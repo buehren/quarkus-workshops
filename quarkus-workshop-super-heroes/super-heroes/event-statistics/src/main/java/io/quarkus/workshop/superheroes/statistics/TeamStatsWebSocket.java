@@ -43,8 +43,8 @@ public class TeamStatsWebSocket {
     @PostConstruct
     public void subscribe() {
         stream.subscribe().with(ratio -> sessions.forEach(session -> write(session, ratio)),
-            failure -> System.out.println("Failed with " + failure),
-            () -> System.out.println("Completed"));
+            failure -> LOGGER.error("TeamStatsWebSocket.subscribe() failed with " + failure, failure),
+            () -> LOGGER.info("Completed TeamStatsWebSocket.subscribe()"));
     }
 
 //    @PreDestroy

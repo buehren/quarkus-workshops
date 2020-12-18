@@ -9,12 +9,16 @@ import org.eclipse.microprofile.reactive.messaging.Outgoing;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.logging.Logger;
+
+
 @ApplicationScoped
 public class SuperStats {
 
+    private static final Logger LOGGER = Logger.getLogger(SuperStats.class);
+
     private Ranking topWinners = new Ranking(10);
     private TeamStats stats = new TeamStats();
-
 
     @Incoming("fights")
     @Outgoing("results")
@@ -28,9 +32,12 @@ public class SuperStats {
     }
 
     private FightResult compute(FightResult s, Fight f) {
+        LOGGER.info("Fight -> FightResult");
         s.setFightDate(f.fightDate);
         s.setWinnerName(f.winnerName);
         s.setLoserName(f.loserName);
+        s.setWinnerTeam(f.winnerTeam);
+        s.setLoserTeam(f.loserTeam);
         return s;
     }
 
@@ -59,6 +66,7 @@ public class SuperStats {
     }
 
     private Score incrementScore(Score score,FightResult fightResult){
+        LOGGER.info("incrementScore");
         score.name =  fightResult.getWinnerName();
         score.score = score.score +1;
         return score;

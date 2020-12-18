@@ -49,8 +49,8 @@ public class TopWinnerWebSocket {
         winners
             .map(scores -> jsonb.toJson(scores))
             .subscribe().with(serialized -> sessions.forEach(session -> write(session, serialized)),
-                failure -> System.out.println("Failed with " + failure),
-                () -> System.out.println("Completed"));
+                failure -> LOGGER.error("TopWinnerWebSocket.subscribe() failed with " + failure, failure),
+                () -> LOGGER.info("Completed TopWinnerWebSocket.subscribe()"));
     }
 
     @PreDestroy
