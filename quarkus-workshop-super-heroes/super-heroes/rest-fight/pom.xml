@@ -25,7 +25,8 @@
     <name>Quarkus Workshop :: Super-Heroes :: Fight REST API</name>
 
     <properties>
-        <quarkus.version>1.9.2.Final</quarkus.version>
+        <quarkus.version>1.10.3.Final</quarkus.version>
+        <quarkus-plugin.version>1.10.3.Final</quarkus-plugin.version>
         <surefire-plugin.version>2.22.0</surefire-plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -119,17 +120,17 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.12.2</version>
+            <version>1.15.1</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.12.2</version>
+            <version>1.15.1</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>kafka</artifactId>
-            <version>1.12.2</version>
+            <version>1.15.1</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>

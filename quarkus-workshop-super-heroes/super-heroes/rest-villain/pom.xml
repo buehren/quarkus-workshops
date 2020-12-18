@@ -25,8 +25,9 @@
     <name>Quarkus Workshop :: Super-Heroes :: Villain REST API</name>
 
     <properties>
-        <quarkus.version>1.9.2.Final</quarkus.version>
-        <surefire-plugin.version>2.22.0</surefire-plugin.version>
+        <quarkus.version>1.10.3.Final</quarkus.version>
+        <quarkus-plugin.version>1.10.3.Final</quarkus-plugin.version>
+        <surefire-plugin.version>2.22.1</surefire-plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
