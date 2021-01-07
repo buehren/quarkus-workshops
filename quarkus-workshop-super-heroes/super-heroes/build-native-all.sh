@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd rest-hero && \
 mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests && \
 cd .. && \

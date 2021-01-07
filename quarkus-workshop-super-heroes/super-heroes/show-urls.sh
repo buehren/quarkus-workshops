@@ -1,0 +1,10 @@
+hostname="localhost"
+
+echo "Hero API:               http://$hostname:8083/"
+echo "Villain API:            http://$hostname:8084/"
+echo "Fight API:              http://$hostname:8082/"
+echo ""
+echo "Prometheus Metrics:     http://$hostname:9090/"
+echo ""
+echo "Fight UI:               http://$hostname:8080/  <<<<<<<<<< PLAY HERE"
+echo "Fight Stats (reactive): http://$hostname:8085/  <<<<<<<<<< WATCH THIS"
