@@ -29,6 +29,7 @@ import {Configuration} from '../configuration';
 export class FightService {
 
   protected basePath = 'http://localhost:8082';
+  protected port = "8082";
   public defaultHeaders = new HttpHeaders();
   public configuration = new Configuration();
 
@@ -40,7 +41,8 @@ export class FightService {
       this.basePath = basePath;
     }
     if (!window.location.host.includes("localhost")) {
-      this.basePath = window.location.protocol + "//" + window.location.host;
+      // This does not work when Quarkus Dev Mode reloads the app because of changes in the files
+      this.basePath = window.location.protocol + "//" + window.location.hostname + ":" + this.port;
     }
 
     if (configuration) {
