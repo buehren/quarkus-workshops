@@ -29,13 +29,14 @@ cd ui-super-heroes
 echo "Building UI" && \
 mvn install && \
 npm install && \
-./package.sh && \
-echo "Starting UI in background" && \
-mvn quarkus:dev -Ddebug=false &>> /tmp/ui-super-heroes.dev.out &
+./package.sh
+echo "Starting UI in background (JAR - TODO: in dev mode, only localhost:8082 works but the ip address)" && \
+java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
+#mvn quarkus:dev -Ddebug=false &>> /tmp/ui-super-heroes.dev.out &
 cd ..
 
 echo ""
-echo "Log outputs: /tmp/*.dev.out"
+echo "Log outputs: /tmp/*.dev.out /tmp/*.jar.out"
 echo ""
 
 ./show-urls.sh
