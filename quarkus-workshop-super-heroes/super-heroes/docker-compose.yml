@@ -1,0 +1,30 @@
+version: '2'
+services:
+
+  quarkus-workshop-hero:
+    #container_name: "quarkus-workshop-hero"
+    image: "tbuehren/quarkus-workshop-hero"
+    ports:
+      - 8083:8083
+    network_mode: "host"
+
+  quarkus-workshop-villain:
+    #container_name: "quarkus-workshop-villain"
+    image: "tbuehren/quarkus-workshop-villain"
+    ports:
+      - 8084:8084
+    network_mode: "host"
+
+  quarkus-workshop-fight:
+    #container_name: "quarkus-workshop-fight"
+    image: "tbuehren/quarkus-workshop-fight"
+    ports:
+      - 8082:8082
+    network_mode: "host"
+
+  quarkus-workshop-stats:
+    #container_name: "quarkus-workshop-stats"
+    image: "tbuehren/quarkus-workshop-stats"
+    ports:
+      - 8085:8085
+    network_mode: "host"
