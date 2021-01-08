@@ -13,11 +13,8 @@
 echo "Starting Services in background"
 docker-compose up -d
 
-echo "Starting UI in background (JAR - TODO: port 8080 missing in native fight service)" && \
-java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
-
 echo ""
-echo "Log outputs: tail -n 10 -F /tmp/*.jar.out  +  docker-compose logs -f"
+echo "Log outputs: docker-compose logs -f"
 echo ""
 
 ./show-urls.sh

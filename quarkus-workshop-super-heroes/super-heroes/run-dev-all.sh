@@ -2,6 +2,12 @@
 
 # Before this, start the infrastructure services:
 #     ./run-infrastructure.sh
+# ...and build the UI:
+#     ./build-ui.sh
+
+# You should STOP "vagrant rsync-auto" while running this to avoid deletion of
+#   rest-fight/src/main/resources/META-INF/resources/super-heroes
+# when changing files on the host!
 
 set -e
 
@@ -15,9 +21,17 @@ echo "Starting Villain Service in background"
 mvn quarkus:dev -Ddebug=false &>> /tmp/rest-villain.dev.out &
 cd ..
 
+cd ui-super-heroes
+echo "Starting UI in background (not really necessary because UI is available in rest-fight service)"
+mvn quarkus:dev -Ddebug=false &>> /tmp/ui-super-heroes.dev.out &
+cd ..
+
 cd rest-fight
 echo "Starting Fight Service in background"
+cp -R ../ui-super-heroes/dist/* src/main/resources/META-INF/resources
+mvn compile
 mvn quarkus:dev -Ddebug=false &>> /tmp/rest-fight.dev.out &
+ls -d src/main/resources/META-INF/resources/super-heroes
 cd ..
 
 cd event-statistics
@@ -25,18 +39,8 @@ echo "Starting Event-Statistics Service in background"
 mvn quarkus:dev -Ddebug=false &>> /tmp/event-statistics.dev.out &
 cd ..
 
-cd ui-super-heroes
-echo "Building UI" && \
-mvn install && \
-npm install && \
-./package.sh
-echo "Starting UI in background (JAR - TODO: in dev mode, only localhost:8082 works but the ip address)" && \
-java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
-#mvn quarkus:dev -Ddebug=false &>> /tmp/ui-super-heroes.dev.out &
-cd ..
-
 echo ""
-echo "Log outputs: /tmp/*.dev.out /tmp/*.jar.out"
+echo "Log outputs: tail -n 10 -F /tmp/*.dev.out"
 echo ""
 
 ./show-urls.sh

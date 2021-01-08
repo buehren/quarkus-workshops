@@ -20,11 +20,12 @@ rest-fight/target/rest-fight-01-runner &>> /tmp/rest-fight.native.out &
 echo "Starting Event-Statistics Service in background"
 event-statistics/target/event-statistics-01-runner &>> /tmp/event-statistics.native.out &
 
-echo "Starting UI in background (JAR - TODO: port 8080 missing in native fight service)" && \
-java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
+# HTML UI is available in the fight service
+#echo "Starting UI in background" && \
+#java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
 
 echo ""
-echo "Log outputs: /tmp/*.native.out /tmp/*.jar.out "
+echo "Log outputs: tail -n 10 -F /tmp/*.native.out"
 echo ""
 
 ./show-urls.sh
