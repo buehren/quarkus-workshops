@@ -4,8 +4,10 @@
 #     ./run-infrastructure.sh
 # ...and run the services in dev mode to create database records (required only once):
 #     ./run-dev-all.sh
-# ...and kill the services running in dev mode
-# ...and build the native executables:
+# ...and kill the services running in dev mode:
+#     ./stop-dev-all.sh
+# ...and build the UI and native executables:
+#     ./build-ui.sh
 #     ./build-native-all.sh
 
 echo "Starting Hero Service in background"
@@ -21,7 +23,7 @@ echo "Starting Event-Statistics Service in background"
 event-statistics/target/event-statistics-01-runner &>> /tmp/event-statistics.native.out &
 
 # HTML UI is available in the fight service
-#echo "Starting UI in background" && \
+#echo "Starting UI in background"
 #java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
 
 echo ""

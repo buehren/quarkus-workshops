@@ -4,8 +4,10 @@
 #     ./run-infrastructure.sh
 # ...and run the services in dev mode to create database records (required only once):
 #     ./run-dev-all.sh
-# ...and kill the services running in dev mode
-# ...and build the native executables:
+# ...and kill the services running in dev mode:
+#     ./stop-dev-all.sh
+# ...and build the UI and native executables:
+#     ./build-ui.sh
 #     ./build-native-all.sh
 # ...and build the Docker images:
 #     ./build-docker-all.sh

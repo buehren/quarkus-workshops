@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Before this, build the native executables:
+# Before this, build the UI and native executables:
+#     ./build-ui.sh
 #     ./build-native-all.sh
 
 
