@@ -1,0 +1,21 @@
+{
+  "resources":{
+  "includes":[
+    {"pattern":"\\QMETA-INF/quarkus-generated-openapi-doc.JSON\\E"},
+    {"pattern":"\\QMETA-INF/services/io.smallrye.config.SmallRyeConfigFactory\\E"},
+    {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.BufferFactory\\E"},
+    {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.FutureFactory\\E"},
+    {"pattern":"\\QMETA-INF/services/java.sql.Driver\\E"},
+    {"pattern":"\\QMETA-INF/services/org.eclipse.microprofile.config.spi.ConfigSource\\E"},
+    {"pattern":"\\QMETA-INF/services/org.eclipse.microprofile.config.spi.Converter\\E"},
+    {"pattern":"\\Qapplication.properties\\E"},
+    {"pattern":"\\Qcom.google.cloud.sql/project.properties\\E"},
+    {"pattern":"\\Qcom/google/api/client/googleapis/google-api-client.properties\\E"},
+    {"pattern":"\\Qcom/google/api/client/googleapis/google.jks\\E"},
+    {"pattern":"\\Qgoogle-http-client.properties\\E"},
+    {"pattern":"\\Qjbossts-properties.xml\\E"},
+    {"pattern":"\\Qorg/jboss/threads/Version.properties\\E"},
+    {"pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"}
+  ]},
+  "bundles":[]
+}
