@@ -1,0 +1,56 @@
+---
+- hosts: quarkus
+
+  roles:
+
+    # Upgrade linux
+    - role: apt-upgrade # this might cause a reboot if run remotely (and the Ansible playbook will continue after that)
+
+    # Useful linux tools
+    - role: tools
+    - role: oh-my-bash
+
+    # Java
+    - role: java
+      vars:
+        java_packages: openjdk-11-jdk
+
+    # Maven
+    - role: maven
+
+    # Docker
+    - role: docker
+
+    # NodeJS (used for UI)
+    - role: nodejs
+
+    # PostgreSQL CLI
+    - role: postgresql-client
+
+    # Graal Native Image Agent
+    - role: graal-native-image-agent
+      vars:
+      # uncomment release_graalvm to use specific release and skip detection of the latest release:
+      #  release_graalvm: vm-20.3.0
+
+    # Google Cloud CLI
+    - role: gcloud-cli # update gcloud_version in role directory gcloud-cli/defaults/main.yml
+
+    # Local Kubernetes and Knative installation
+    - role: k3s
+      vars:
+        k3s_server:
+          #datastore-endpoint: postgres://postgres:verybadpass@database:5432/postgres?sslmode=disable
+          #cluster-cidr: 172.20.0.0/16
+          flannel-backend: 'none'  # This needs to be in quotes
+          disable:
+            - traefik
+            #- coredns
+    - role: knative
+      # uncomment release_* to use specific releases and skip detection of the latest release:
+      #  release_serving: v0.19.0
+      #  release_eventing: v0.19.4
+      #  release_client: v0.19.1
+
+#  environment:
+#    KUBECONFIG: /etc/rancher/k3s/k3s.yaml

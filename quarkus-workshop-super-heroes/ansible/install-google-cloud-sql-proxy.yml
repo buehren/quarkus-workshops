@@ -1,0 +1,11 @@
+---
+# You must specify the Google Cloud SQL Connection Name on the command line:
+#     ansible-playbook playbook-google-cloud-sql-proxy.yml --extra-vars "GCLOUD_DB_CONNECTION_NAME=..."
+# To get the connection name of a Google Cloud SQL instance:
+#     gcloud sql instances describe "$GCLOUD_DB_INSTANCE" --format="value(connectionName)"
+- hosts: quarkus
+
+  roles:
+    - role: gcloud-sql-proxy
+      vars:
+        cloud_sql_proxy_connection_name: "{{ GCLOUD_DB_CONNECTION_NAME }}"
