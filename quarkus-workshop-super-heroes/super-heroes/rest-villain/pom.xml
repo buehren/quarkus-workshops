@@ -142,6 +142,33 @@
 
     <profiles>
         <profile>
+            <id>googlecloudsql</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>${env.QUARKUS_PROFILE}</name>
+                    <value>googlecloudsql</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.google.cloud.sql</groupId>
+                    <artifactId>postgres-socket-factory</artifactId>
+                    <version>1.2.0</version>
+                </dependency>
+                <dependency>
+                    <!-- https://github.com/quarkusio/quarkus/issues/6327 -->
+                    <groupId>jakarta.security.jacc</groupId>
+                    <artifactId>jakarta.security.jacc-api</artifactId>
+                </dependency>
+                <dependency>
+                    <!-- https://github.com/quarkusio/quarkus/issues/6327 -->
+                    <groupId>net.java.dev.jna</groupId>
+                    <artifactId>jna</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>native</id>
             <build>
                 <plugins>

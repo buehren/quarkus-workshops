@@ -1,0 +1,8 @@
+.gcloudignore
+.git
+.gitignore
+/.mvn/
+/src/*
+!/src/main/docker/
+/target/*
+!/target/*-runner
