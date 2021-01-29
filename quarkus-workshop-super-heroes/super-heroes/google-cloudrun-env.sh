@@ -74,6 +74,6 @@ function set_variables
 
 #set +e
 
-set_variables || echo "An ERROR occured!"
+set_variables || ( echo "An ERROR occured!"; false )
 
 #set -vx; eval "$oldsetstate" > /dev/null # restore all options stored.
