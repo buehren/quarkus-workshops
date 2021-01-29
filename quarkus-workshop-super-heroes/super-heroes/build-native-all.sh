@@ -7,17 +7,26 @@
 #   rest-fight/src/main/resources/META-INF/resources/super-heroes
 # when changing files on the host!
 
-cd rest-hero && \
-mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests $MAVEN_EXTRA_ARGS && \
-cd .. && \
-cd rest-villain && \
-mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests $MAVEN_EXTRA_ARGS  && \
-cd .. && \
-cd rest-fight && \
-cp -R ../ui-super-heroes/dist/* src/main/resources/META-INF/resources && \
-mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests $MAVEN_EXTRA_ARGS  && \
-ls -d src/main/resources/META-INF/resources/super-heroes && \
-cd .. && \
-cd event-statistics && \
-mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests $MAVEN_EXTRA_ARGS  && \
-cd ..
+function run
+{
+    source superhero-services-env.sh || return
+
+    for service in $SUPERHERO_SERVICES; do
+      echo "======================================= $service ======================================= " && \
+      [ "$service" == "rest-fight" ] && ( cp -R ui-super-heroes/dist/* rest-fight/src/main/resources/META-INF/resources || {
+          echo "UI not found: Run ./build-ui.sh"
+          return 1;
+      })
+      \
+      cd $service && \
+      mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests $MAVEN_EXTRA_ARGS  && \
+      cd .. && \
+      \
+      [ "$service" == "rest-fight" ] && ( ls -d rest-fight/src/main/resources/META-INF/resources/super-heroes || {
+          echo "UI no longer found after build: Maybe it was deleted by rsync?"
+          return 1;
+      })
+    done
+}
+
+run || ( echo "An ERROR occured!"; false )

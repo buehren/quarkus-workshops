@@ -9,25 +9,24 @@
 # ...and build the UI and native executables:
 #     ./build-ui.sh
 #     ./build-native-all.sh
-
-echo "Starting Hero Service in background"
-rest-hero/target/rest-hero-01-runner &>> /tmp/rest-hero.native.out &
-
-echo "Starting Villain Service in background"
-rest-villain/target/rest-villain-01-runner &>> /tmp/rest-villain.native.out &
-
-echo "Starting Fight Service in background"
-rest-fight/target/rest-fight-01-runner &>> /tmp/rest-fight.native.out &
-
-echo "Starting Event-Statistics Service in background"
-event-statistics/target/event-statistics-01-runner &>> /tmp/event-statistics.native.out &
-
+#
 # HTML UI is available in the fight service
-#echo "Starting UI in background"
-#java -jar ui-super-heroes/target/ui-super-heroes-01-runner.jar &>> /tmp/ui-super-heroes.jar.out &
 
-echo ""
-echo "Log outputs: tail -n 10 -F /tmp/*.native.out"
-echo ""
+function run
+{
+    source superhero-services-env.sh || return
 
-./show-urls.sh
+    for service in $SUPERHERO_SERVICES; do
+        echo "======================================= $service ======================================= " && \
+        echo "Starting $service in background"
+        $service/target/$service-01-runner &>> /tmp/$service.native.out &
+    done
+
+    echo ""
+    echo "Log outputs: tail -n 10 -F /tmp/*.native.out"
+    echo ""
+
+    ./show-urls.sh
+}
+
+run || ( echo "An ERROR occured!"; false )
