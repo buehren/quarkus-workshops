@@ -1,0 +1,427 @@
+== Quarkus Super-Heroes Workshop
+
+* xref:../../README.adoc#setup[Setup,window=_blank]
+and xref:../../README.adoc#start-project-vm[start,window=_blank]
+the Quarkus VM
+
+* xref:../../README.adoc#ssh-login[Login to the Quarkus VM,window=_blank] with your SSH client.
+
+(The links reference my `https://github.com/buehren/learn/blob/master/jvm/quarkus/README.adoc[learn.git/jvm/quarkus/README.adoc]`)
+
+=== Additional setup
+
+* Run the following playbook as described in xref:../../README.adoc#run-playbook[Configure the VM with Ansible] but replace the call of `ansible-playbook` with the following:
++
+[source%nowrap,bash]
+----
+# In the Ansible-Controller VM:
+
+cd ~/prj/quarkus/ansible && \
+ansible-playbook ~/prj/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/ansible/playbook.yml
+----
+
+=== Local build + run
+
+IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
++
+After that restart it to continue syncing changes from the host to the VM.
+
+* In the Quarkus VM:
++
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+./run-infrastructure.sh
+./build-ui.sh
+
+# This populates the database on start - enable this once when starting with empty database:
+export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=drop-and-create
+
+# Build and run in dev mode:
+./run-dev-all.sh
+# Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
+# :8085 does not work in dev mode!!
+./stop-dev-all.sh
+
+unset QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION
+export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION
+
+# Build and run runner-jars:
+./build-jars-all.sh
+./run-jars-all.sh
+# Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
+./stop-jars-all.sh
+
+# Build and run native executables:
+./build-native-all.sh
+./run-native-all.sh
+# Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
+./stop-native-all.sh
+
+# Build and run Docker images:
+./build-docker-all.sh
+./run-docker-all.sh
+# Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
+./stop-docker-all.sh
+----
+
+
+=== Google Cloud Run (like Knative)
+
+* Guides:
+** https://quarkus.io/guides/deploying-to-google-cloud#deploying-to-google-cloud-run[QUARKUS - DEPLOYING TO GOOGLE CLOUD PLATFORM (GCP)]
+** https://medium.com/@alexismp/deploying-a-quarkus-app-to-google-cloud-run-c4a8ca3be526[Deploying a Quarkus native app to Cloud Run]
+** https://github.com/quad-teams/quarkus-google-cloud-run[Quick Guide: Quarkus on Google Cloud Run] (includes config files and deploy scripts)
+** https://github.com/ahmetb/cloud-run-faq[Google Cloud Run FAQ] (community-maintained informal knowledge base)
+
+==== Setup
+
+* TODO: Automate this with Terraform or something similar (or even Vagrant?)
+
+* Configure the gcloud CLI as described in `roles/gloud-cli/README.adoc` in the Ansible Configuration Project.
+
+* Deploy Google Cloud Resources:
++
+IMPORTANT: The Google Cloud SQL instance costs! +
+When no longer needed: <<delete-cloud-sql-instance>> and <<delete-cloud-project>>
++
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+# Set environment variables: Follow the instructions in case of errors -
+# until it complains about a missing database - we will create that in the next step.
+source google-cloudrun-env.sh
+
+# Allow access from this project's Google Cloud Run to Google Cloud SQL:
+gcloud projects add-iam-policy-binding $GCLOUD_PROJECT_ID \
+  --member serviceAccount:$GCLOUD_SERVICEACCOUNT \
+  --role roles/cloudsql.client
+
+# Create PostgreSQL database instance:
+gcloud sql instances create my-database \
+  --tier=db-f1-micro \
+  --region=europe-west3 \
+  --assign-ip \
+  --database-version=POSTGRES_13 \
+  --storage-type=SSD \
+  --storage-size=10GB
+
+# Set environment variables again - now it should finish successfully:
+source google-cloudrun-env.sh
+
+# Set postgres password:
+gcloud sql users set-password postgres --instance=$GCLOUD_DB_INSTANCE --prompt-for-password
+
+# Create users:
+gcloud sql users create superman --password=superman --instance=$GCLOUD_DB_INSTANCE
+gcloud sql users create superbad --password=superbad --instance=$GCLOUD_DB_INSTANCE
+gcloud sql users create superfight --password=superfight --instance=$GCLOUD_DB_INSTANCE
+
+# Create databases in the postgres console:
+gcloud sql connect $GCLOUD_DB_INSTANCE
+# After "allowlisting your IP for incoming connection for 5 minutes..."
+# you can also use the regular console to connect (within 5 minutes):
+# psql -h $GCLOUD_DB_INSTANCE_IP -U postgres
+
+# Run these commands in the postgres console:
+GRANT superman TO postgres;
+GRANT superbad TO postgres;
+GRANT superfight TO postgres;
+CREATE DATABASE heroes_database OWNER superman;
+CREATE DATABASE villains_database OWNER superbad;
+CREATE DATABASE fights_database OWNER superfight;
+\l
+----
+
+* Install Google Cloud SQL Proxy for accessing the database from the local host:
+
+** You must specify the Google Cloud SQL Connection Name on the following command line.
+It is displayed as `GCLOUD_DB_CONNECTION_NAME` when running `source google-cloudrun-env.sh`.
+
+** Run the following playbook as described in <<run-playbook>> but replace the call of `ansible-playbook`
+with the following (and replace ... with the Connection Name)
++
+[source%nowrap,bash]
+----
+# In the Ansible-Controller VM:
+
+cd ~/prj/quarkus/ansible && \
+ansible-playbook \
+  ~/prj/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/ansible/install-google-cloud-sql-proxy.yml \
+  --extra-vars "GCLOUD_DB_CONNECTION_NAME=..."
+----
+
+===== Google Cloud SQL database connection background [[google-cloud-sql-background]]
+
+Google Cloud SQL can be connected in different ways:
+
+* Public IP address - not very secure, although you can define the allowed IP addresses.
+
+* Private IP address - requires a Google VPC setup that costs (and can it be accessed from outside?).
+
+* By service account - requires a specialized PostgreSQL SocketFactory from Google.
+** We use this option in this project. The Maven and Quarkus profiles `googlecloudsql` include the dependency
+when building (`pom.xlm`) and activate the required configuration at runtime (`application.properties`).
+** But Google's SocketFactory is not (yet?) compatible with native executables created by GraalVM
+because the library uses reflection a lot -- which cannot be analyzed statically.
+** Therefore, we use the GraalVM native image tracing agent for dynamic analysis
+while running the service in JVM mode. This was already done, and the resulting configuration
+is enabled in this project. +
+-> In <<native-image-agent>> we will see how that works.
+
+===== Populate and access Google Cloud SQL database from local host
+
+1. Set environment, start Google Cloud SQL Proxy:
++
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+source ./google-cloudrun-env.sh
+
+export SUPERHERO_SERVICES="rest-hero rest-villain rest-fight event-statistics"
+
+sudo service cloud-sql-proxy start
+----
+
+2. (Re-)Create database tables and insert content from `import.sql` into the Google Cloud SQL Database using Quarkus DEV mode.
++
+IMPORTANT: The following code starts each service that recreate
+the tables and insert data into the Google Cloud SQL database. +
+Press CTRL+C (once) for each service after they have started and finished the inserts.
++
+[source%nowrap,bash]
+----
+for service in $SUPERHERO_SERVICES; do
+  source google-cloudsql-datasource-env.sh $service && \
+  cd $service && \
+  mvn clean quarkus:dev \
+      -Pgooglecloudsql \
+      -Dquarkus.profile=googlecloudsql \
+      -Dquarkus.hibernate-orm.database.generation=drop-and-create \
+      -Ddebug=false
+  cd ..
+done
+----
+
+3. Access Google Cloud SQL Database from local host. [[localhost-accessing-googlecloudsql]]
++
+TIP: In case the JVM mode works but the native mode produces strange exceptions,
+it might help to repeat <<native-image-agent>> -- maybe a new library version
+needs to be analyzed dynamically.
++
+[source%nowrap,bash]
+----
+export QUARKUS_PROFILE=googlecloudsql
+export MAVEN_EXTRA_ARGS=-Pgooglecloudsql
+
+./build-ui.sh
+
+#TODO: UMGEBUNGSVARIABLEN FEHLEN Could not expand value DATASOURCE_DBNAME in property quarkus.datasource.jdbc.url
+#source google-cloudsql-datasource-env.sh $service
+
+# JVM
+./build-jars-all.sh && ./run-jars-all.sh
+./stop-jars-all.sh
+
+# Native
+./build-native-all.sh && ./run-native-all.sh
+./stop-native-all.sh
+----
+
+4. Stop Google Cloud SQL proxy:
++
+[source%nowrap,bash]
+----
+sudo service cloud-sql-proxy stop
+----
+
+==== Analyze external library with GraalVM native image agent [[native-image-agent]]
+
+#TODO#
+
+As described in <<google-cloud-sql-background>> ....
+
+
+https://github.com/oracle/graal/blob/master/substratevm/Reflection.md
+https://github.com/oracle/graal/blob/master/substratevm/Resources.md
+https://medium.com/graalvm/introducing-the-tracing-agent-simplifying-graalvm-native-image-configuration-c3b56c486271
+https://www.graalvm.org/reference-manual/native-image/BuildConfiguration/#assisted-configuration-of-native-image-builds
+https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/issues/217
+https://github.com/quarkusio/quarkus/pull/6634
+https://stackoverflow.com/questions/63091045/invalid-jwt-failed-audience-check-when-using-google-api-services-in-graalvm-n
+https://github.com/Taig/flog/blob/cfeff44/modules/stackdriver-http/src/main/resources/META-INF/native-image/io.taig/flog-stackdriver-http/reflect-config.json
+https://github.com/quarkusio/quarkus-quickstarts/compare/master...norrs:mysql_cloudrun_cloudsql
+
+
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+
+TOOD: Script für jvm-build mit google-optionen
+
+TODO: Script für ausführung mit agentlib!
+
+TODO: Klassen aus reflect-config.json ignorieren, die in einem service nicht vorhanden sind??
+
+TODO: lokale Klassen aus io.quarkus.workshop.superheroes ignorieren!
+      (vermutlich nicht nötig wenn fehlende klassen aus reflect-config.json ignoriert werden)
+
+
+source ./google-cloudrun-env.sh
+
+export SUPERHERO_SERVICES="rest-hero rest-villain rest-fight event-statistics"
+
+sudo service cloud-sql-proxy start
+
+for service in $SUPERHERO_SERVICES; do
+  source google-cloudsql-datasource-env.sh $service && \
+  cd $service && \
+  mvn clean package -DskipTests && \
+  java -jar target/$service-01-runner.jar -Dquarkus.profile=googlecloudsql
+  cd ..
+done
+
+cd rest-hero
+mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests
+target/rest-hero-01-runner -Dquarkus.profile=googlecloudsql
+# will fail
+
+mvn clean package -DskipTests
+java \
+  -agentlib:native-image-agent=config-merge-dir=~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent \
+  -Dquarkus.profile=googlecloudsql
+  -jar target/rest-hero-01-runner.jar
+
+
+# Play around
+
+# rest-hero-01-runner should work now
+
+TODO: Build native for Google + try locally
+
+# Build native executables for Google Cloud Run / Google Cloud SQL:
+# (NOT NECESSARY if your last build was native with the googlecloudsql environment variables set)
+./build-ui.sh && ./google-cloudrun-build-native-all.sh
+
+
+sudo service cloud-sql-proxy stop
+----
+
+Now run the native services locally with access to Google Cloud SQL to test them (see <<localhost-accessing-googlecloudsql, here>>).
+
+Copy the results of the GraalVM native image agent from the VM to your host:
+
+[source%nowrap,bash]
+----
+# On host:
+C:\Users\tbuehren\Documents\buehren\learn\jvm\quarkus\quarkus-workshops\quarkus-workshop-super-heroes\super-heroes\rest-hero\src\main\resources\native-config>
+
+scp \
+  vagrant@192.168.42.12:/home/vagrant/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent/* \
+  .\super-heroes\super-heroes\graal-native-image-agent\
+----
+
+==== Build and deploy to Google Cloud Run
+
+IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
++
+After that restart it to continue syncing changes from the host to the VM.
+
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+# Build native executables for Google Cloud Run / Google Cloud SQL:
+# (NOT NECESSARY if your last build was native with the googlecloudsql environment variables set)
+./build-ui.sh && ./google-cloudrun-build-native-all.sh
+
+# Deploy to Google Cloud Run
+./google-cloudrun-deploy-all.sh
+----
+
+==== Send requests
+
+#TODO#
+
+
+
+time curl $SERVICE_REST_HERO_URL/api/heroes/random
+real    0m2.244s
+real    0m0.164s
+
+rest-hero 01 native (powered by Quarkus 1.10.3.Final) started in 1.297s. Listening on: http://0.0.0.0:4242
+
+
+Log explorer!
+
+time curl $SERVICE_REST_HERO_URL/api/heroes/random
+TODO
+
+
+==== Delete Google Cloud SQL Instance [[delete-cloud-sql-instance]]
+
+[source%nowrap,bash]
+----
+gcloud sql instances delete $GCLOUD_DB_INSTANCE
+----
+
+==== Delete Google Cloud Project [[delete-cloud-project]]
+
+Web console
+
+
+=== Knative on local Kubernetes
+
+TODO
+C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\README.md
+C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\src\main\knative\service-native.yaml
+
+playbook-kubernetes-knative-local.yml
+
+
+== TO DO
+
+TODO: DATENBANK EINRICHTUNG / ZUGRIFF / FÜLLEN!
+
+TODO: Google Cloud SQL über public IP verbinden und firewall-regeln dafür einrichten?
+"This guide will help you through the fourth possibility: connecting using service account."  https://github.com/quarkusio/quarkus/pull/6634/files
+I don't think this is necessarily a blocker, as Cloud Run now has Serverless VPC access in beta. This means it's possible to connect directly to Cloud SQL via Private IP without the use of this library.
+
+TODO: Profil für Google Cloud Run-Konfiguration
+
+TODO: Eventing!
+TODO: Kafka?
+
+
+
+lokales Knative:
+- TODO: workshop-Images als Services installieren
+- TODO: PostgreSQL + Kafka
+- TODO: Zugriff von anderen Rechnern im Netz
+> http http://hello.hello.192.168.1.97.xip.io/ --headers
+HTTP/1.1 404 Not Found
+
+
+TODO: workshop-Images und Infrastruktur automatisieren
+
+TODO: Deploy auf Cloud Run mit yaml + kn / kubetcl? Mit .kubeconig? Schon im alten Beispielprojekt? oder im neuen beispielprojekt unter referenzen oben?
+gcloud run services replace --platform=managed <file.yaml>
+https://github.com/ahmetb/cloud-run-faq#can-i-use-kubectl-to-deploy-to-cloud-run
+
+TODO: Native Executables auch in Cloud Build bauen lassen. (Relevant für Gitops)
+HIER: https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker-build
+
+TODO: yaml statt gcloud-Kommandozeile?
+
+
+TODO: Oder eigene Container bauen und hochladen: C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\README.md
+TODO: Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
+
+TODO: Dieses Wissen zentral ablegen
+
+TODO: Reactive API für DB + alles
+
+

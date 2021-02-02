@@ -2,7 +2,10 @@
 
 == Instructions
 
-Check https://quarkus.io/quarkus-workshops/super-heros/ to get the workshop instructions.
+* See xref:README-thomas.adoc[window=_blank] for my own instructions and scripts etc. for running and deploying the services
+* See link:Quarkus%20Workshop.html[Quarkus Workshop.html,window=_blank] to get the workshop explanations +
++
+Check https://quarkus.io/quarkus-workshops/super-heros/ to get the latest workshop instructions.
 
 == Generate the documentation
 
