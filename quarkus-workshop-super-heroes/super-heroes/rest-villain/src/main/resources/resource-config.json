@@ -1,19 +1,31 @@
 {
   "resources": [
     {"pattern":"\\QMETA-INF/quarkus-generated-openapi-doc.JSON\\E"},
+    {"pattern":"\\QMETA-INF/resources/index.html\\E"},
     {"pattern":"\\QMETA-INF/services/io.smallrye.config.SmallRyeConfigFactory\\E"},
     {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.BufferFactory\\E"},
     {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.FutureFactory\\E"},
     {"pattern":"\\QMETA-INF/services/java.sql.Driver\\E"},
+    {"pattern":"\\QMETA-INF/services/javax.json.bind.spi.JsonbProvider\\E"},
     {"pattern":"\\QMETA-INF/services/org.eclipse.microprofile.config.spi.ConfigSource\\E"},
     {"pattern":"\\QMETA-INF/services/org.eclipse.microprofile.config.spi.Converter\\E"},
+    {"pattern":"\\QMETA-INF/services/org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory\\E"},
+    {"pattern":"\\QMETA-INF/services/org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsEngine\\E"},
+    {"pattern":"\\QMETA-INF/services/org.eclipse.yasson.spi.JsonbComponentInstanceCreator\\E"},
     {"pattern":"\\Qapplication.properties\\E"},
     {"pattern":"\\Qcom.google.cloud.sql/project.properties\\E"},
     {"pattern":"\\Qcom/google/api/client/googleapis/google-api-client.properties\\E"},
     {"pattern":"\\Qcom/google/api/client/googleapis/google.jks\\E"},
     {"pattern":"\\Qgoogle-http-client.properties\\E"},
     {"pattern":"\\Qjbossts-properties.xml\\E"},
+    {"pattern":"\\Qkafka/kafka-version.properties\\E"},
     {"pattern":"\\Qorg/jboss/threads/Version.properties\\E"},
     {"pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"}
+  ],
+  "bundles":[
+    {"name":"javax.servlet.LocalStrings"},
+    {"name":"javax.servlet.http.LocalStrings"},
+    {"name":"sun.security.util.AuthResources"},
+    {"name":"sun.security.util.Resources"}
   ]
 }
