@@ -9,7 +9,7 @@
 
 function run
 {
-    ./mvn_all.sh "BUILD JAR" "clean package" "$MAVEN_EXTRA_ARGS"
+    ./mvn-all.sh "BUILD JAR" "clean package" "-DskipTests $MAVEN_EXTRA_ARGS"
 }
 
 run || ( echo "An ERROR occured!"; false )

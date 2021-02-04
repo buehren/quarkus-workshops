@@ -9,7 +9,7 @@
 
 function run
 {
-    ./mvn_all.sh "BUILD NATIVE" "clean package" "-Pnative $MAVEN_EXTRA_ARGS"
+    ./mvn-all.sh "BUILD NATIVE" "clean package" "-Pnative -DskipTests $MAVEN_EXTRA_ARGS"
 }
 
 run || ( echo "An ERROR occured!"; false )

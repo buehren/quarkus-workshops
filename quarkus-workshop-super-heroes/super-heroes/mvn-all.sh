@@ -6,6 +6,10 @@ function run
     mvn_phases="$2"
     mvn_params="$3"
 
+    echo title="$title"
+    echo mvn_phases="$mvn_phases"
+    echo mvn_params="$mvn_params"
+
     source superhero-services-env.sh || return
 
     for service in $SUPERHERO_SERVICES; do
@@ -30,4 +34,4 @@ function run
     done
 }
 
-run || ( echo "An ERROR occured!"; false )
+run "$@" || ( echo "An ERROR occured!"; false )
