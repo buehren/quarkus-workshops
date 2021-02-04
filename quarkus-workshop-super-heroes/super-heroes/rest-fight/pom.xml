@@ -184,7 +184,6 @@
         <profile>
             <id>googlecloud</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>${env.QUARKUS_PROFILE}</name>
                     <value>googlecloud</value>
