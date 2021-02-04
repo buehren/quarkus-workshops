@@ -13,7 +13,7 @@ function run
     source google-cloudsql-env.sh || return
     source kafka-env.sh || return
 
-    source build-native-all.sh || return
+    source build-jars-all.sh || return
 }
 
 run || ( echo "An ERROR occured!"; false )

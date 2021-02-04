@@ -182,12 +182,12 @@
 
     <profiles>
         <profile>
-            <id>googlecloudsql</id>
+            <id>googlecloud</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
                     <name>${env.QUARKUS_PROFILE}</name>
-                    <value>googlecloudsql</value>
+                    <value>googlecloud</value>
                 </property>
             </activation>
             <dependencies>

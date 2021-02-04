@@ -29,7 +29,7 @@ import {Configuration} from '../configuration';
 export class FightService {
 
   protected basePath = 'http://localhost:8082';
-  protected port = "443";
+  protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
   public defaultHeaders = new HttpHeaders();
   public configuration = new Configuration();
 

@@ -100,6 +100,16 @@
     </build>
     <profiles>
         <profile>
+            <id>googlecloud</id>
+            <activation>
+                <property>
+                    <name>${env.QUARKUS_PROFILE}</name>
+                    <value>googlecloud</value>
+                </property>
+            </activation>
+            <!-- nothing required for this profile here - but necessary because of parameter in build/deploy scripts -->
+        </profile>
+        <profile>
             <id>native</id>
             <build>
                 <plugins>

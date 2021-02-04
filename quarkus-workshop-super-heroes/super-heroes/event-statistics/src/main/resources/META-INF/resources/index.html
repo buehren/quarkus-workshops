@@ -77,11 +77,11 @@
     $(document).ready(function() {
         var host = window.location.host;
 
-        var top = new WebSocket("ws://" + host + "/stats/winners");
+        var top = new WebSocket("wss://" + host + "/stats/winners"); // for running in Google Cloud Run: wss // for running in local VM: ws
         top.onmessage = function (event) {
             updateTop(event.data);
         };
-        var team = new WebSocket("ws://" + host + "/stats/team");
+        var team = new WebSocket("wss://" + host + "/stats/team"); // for running in Google Cloud Run: wss // for running in local VM: ws
         team.onmessage = function(event) {
             console.log(event.data);
             updateRatio(event.data);

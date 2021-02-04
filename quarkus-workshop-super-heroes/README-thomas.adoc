@@ -1,4 +1,6 @@
-== Quarkus Super-Heroes Workshop
+= Quarkus Super-Heroes Workshop
+:toc:
+:toclevels: 9
 
 * xref:../../README.adoc#setup[Setup,window=_blank]
 and xref:../../README.adoc#start-project-vm[start,window=_blank]
@@ -23,7 +25,7 @@ ansible-playbook ~/prj/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/a
 === Local build + run
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
-+
+ +
 After that restart it to continue syncing changes from the host to the VM.
 
 * In the Quarkus VM:
@@ -66,7 +68,6 @@ export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION
 ./stop-docker-all.sh
 ----
 
-
 === Google Cloud Run (like Knative)
 
 * Guides:
@@ -77,9 +78,32 @@ export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION
 
 ==== Setup
 
-* TODO: Automate this with Terraform or something similar (or even Vagrant?)
-
 * Configure the gcloud CLI as described in `roles/gloud-cli/README.adoc` in the Ansible Configuration Project.
+
+
+===== Kafka in Confluent Cloud
+
+* https://console.cloud.google.com/marketplace/product/endpoints/payg-prod.gcpmarketplace.confluent.cloud?q=Confluent
+* https://console.cloud.google.com/apis/api/payg-prod.gcpmarketplace.confluent.cloud/overview
+* https://confluent.cloud/
+
+[source%nowrap,bash]
+----
+curl -L --http1.1 https://cnfl.io/ccloud-cli | sudo sh -s -- -b /usr/local/bin
+ccloud login --save
+ccloud environment use env-xxxxx
+ccloud kafka cluster use xxx-xxxxx
+ccloud api-key store --resource xxx-xxxxx
+ccloud api-key use XXXXXXXXXXXXXXXX --resource xxx-xxxxx
+
+ccloud kafka topic create fights
+
+# Add 3 lines with 1. bootstrap servers, 2. api key, 3. api secret:
+vi ~/.kafka-api-key
+----
+
+
+===== Google Cloud SQL
 
 * Deploy Google Cloud Resources:
 +
@@ -162,7 +186,7 @@ Google Cloud SQL can be connected in different ways:
 * Private IP address - requires a Google VPC setup that costs (and can it be accessed from outside?).
 
 * By service account - requires a specialized PostgreSQL SocketFactory from Google.
-** We use this option in this project. The Maven and Quarkus profiles `googlecloudsql` include the dependency
+** We use this option in this project. The Maven and Quarkus profiles `googlecloud` include the dependency
 when building (`pom.xlm`) and activate the required configuration at runtime (`application.properties`).
 ** But Google's SocketFactory is not (yet?) compatible with native executables created by GraalVM
 because the library uses reflection a lot -- which cannot be analyzed statically.
@@ -178,9 +202,11 @@ is enabled in this project. +
 [source%nowrap,bash]
 ----
 cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
-source ./google-cloudrun-env.sh
 
-export SUPERHERO_SERVICES="rest-hero rest-villain rest-fight event-statistics"
+source superhero-services-env.sh
+source google-cloudrun-env.sh
+source google-cloudsql-env.sh
+source kafka-env.sh
 
 sudo service cloud-sql-proxy start
 ----
@@ -197,8 +223,8 @@ for service in $SUPERHERO_SERVICES; do
   source google-cloudsql-datasource-env.sh $service && \
   cd $service && \
   mvn clean quarkus:dev \
-      -Pgooglecloudsql \
-      -Dquarkus.profile=googlecloudsql \
+      -Pgooglecloud \
+      -Dquarkus.profile=googlecloud \
       -Dquarkus.hibernate-orm.database.generation=drop-and-create \
       -Ddebug=false
   cd ..
@@ -213,20 +239,17 @@ needs to be analyzed dynamically.
 +
 [source%nowrap,bash]
 ----
-export QUARKUS_PROFILE=googlecloudsql
-export MAVEN_EXTRA_ARGS=-Pgooglecloudsql
-
 ./build-ui.sh
 
-#TODO: UMGEBUNGSVARIABLEN FEHLEN Could not expand value DATASOURCE_DBNAME in property quarkus.datasource.jdbc.url
-#source google-cloudsql-datasource-env.sh $service
-
 # JVM
+./stop-jars-all.sh
 ./build-jars-all.sh && ./run-jars-all.sh
+# ...
 ./stop-jars-all.sh
 
 # Native
 ./build-native-all.sh && ./run-native-all.sh
+# ...
 ./stop-native-all.sh
 ----
 
@@ -235,6 +258,29 @@ export MAVEN_EXTRA_ARGS=-Pgooglecloudsql
 [source%nowrap,bash]
 ----
 sudo service cloud-sql-proxy stop
+----
+
+==== Build and deploy JARs to Google Cloud Run
+
+IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
+ +
+After that restart it to continue syncing changes from the host to the VM.
+
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+# To build / deploy only certain microservices,
+# run this before the build/deploy scripts
+# (with the required services instead of the example):
+#export SUPERHERO_SERVICES="event-statistics rest-fight"
+
+# Build native executables for Google Cloud Run / Google Cloud SQL:
+# (NOT NECESSARY if your last build was native with the googlecloudsql environment variables set)
+./build-ui.sh && ./google-cloudrun-build-jars-all.sh
+
+# Deploy to Google Cloud Run
+./google-cloudrun-deploy-all.sh jvm
 ----
 
 ==== Analyze external library with GraalVM native image agent [[native-image-agent]]
@@ -280,19 +326,19 @@ for service in $SUPERHERO_SERVICES; do
   source google-cloudsql-datasource-env.sh $service && \
   cd $service && \
   mvn clean package -DskipTests && \
-  java -jar target/$service-01-runner.jar -Dquarkus.profile=googlecloudsql
+  java -jar target/$service-01-runner.jar -Dquarkus.profile=googlecloud
   cd ..
 done
 
 cd rest-hero
 mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests
-target/rest-hero-01-runner -Dquarkus.profile=googlecloudsql
+target/rest-hero-01-runner -Dquarkus.profile=googlecloud
 # will fail
 
 mvn clean package -DskipTests
 java \
   -agentlib:native-image-agent=config-merge-dir=~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent \
-  -Dquarkus.profile=googlecloudsql
+  -Dquarkus.profile=googlecloud
   -jar target/rest-hero-01-runner.jar
 
 
@@ -324,22 +370,27 @@ scp \
   .\super-heroes\super-heroes\graal-native-image-agent\
 ----
 
-==== Build and deploy to Google Cloud Run
+==== Build and deploy native to Google Cloud Run
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
-+
+ +
 After that restart it to continue syncing changes from the host to the VM.
 
 [source%nowrap,bash]
 ----
 cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 
+# To build / deploy only certain microservices,
+# run this before the build/deploy scripts
+# (with the required services instead of the example):
+#export SUPERHERO_SERVICES="event-statistics rest-fight"
+
 # Build native executables for Google Cloud Run / Google Cloud SQL:
 # (NOT NECESSARY if your last build was native with the googlecloudsql environment variables set)
 ./build-ui.sh && ./google-cloudrun-build-native-all.sh
 
 # Deploy to Google Cloud Run
-./google-cloudrun-deploy-all.sh
+./google-cloudrun-deploy-all.sh native
 ----
 
 ==== Send requests
@@ -384,16 +435,47 @@ playbook-kubernetes-knative-local.yml
 
 == TO DO
 
-TODO: DATENBANK EINRICHTUNG / ZUGRIFF / FÜLLEN!
+EXPOSE 8080
+
+
+quarkus-workshop-super-heroes/super-heroes/event-statistics/src/main/resources/META-INF/resources/index.html
+var top = new WebSocket("wss://" + host + "/stats/winners"); // for running in Google Cloud Run: wss // for running in local VM: ws
+var team = new WebSocket("wss://" + host + "/stats/team"); // for running in Google Cloud Run: wss // for running in local VM: ws
+
+quarkus-workshop-super-heroes/super-heroes/ui-super-heroes/src/app/shared/api/fight.service.ts
+protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
+
+
+done: Profil für Google Cloud Run-Konfiguration
+
+done: Kafka
+
+done: Scripte + Anleitung für JVM Build + Deploy auf Google Cloud Run
+
+#TODO: commit#
+
+#TODO: Native GraalVM configuration für rest-fight und event-statistics#
+
+TODO: event-statistics ui websocket timeout handling
+
+TODO: umstellung auf quarkus 1.11, Dev UI?
+
+TODO: umstellung auf RESTEasy Reactive
+
+
+
+
+TODO: Knative Eventing (Cloud Run Eventing) nutzen statt Kafka direkt?
+
+
+TODO: Secrets (z.B. DB-Passwords, Kafka-Secret) sicher speichern (insb. nicht in variablen in cloud run)
+
 
 TODO: Google Cloud SQL über public IP verbinden und firewall-regeln dafür einrichten?
 "This guide will help you through the fourth possibility: connecting using service account."  https://github.com/quarkusio/quarkus/pull/6634/files
 I don't think this is necessarily a blocker, as Cloud Run now has Serverless VPC access in beta. This means it's possible to connect directly to Cloud SQL via Private IP without the use of this library.
 
-TODO: Profil für Google Cloud Run-Konfiguration
 
-TODO: Eventing!
-TODO: Kafka?
 
 
 
@@ -425,3 +507,6 @@ TODO: Dieses Wissen zentral ablegen
 TODO: Reactive API für DB + alles
 
 
+TODO: Automate setup with Terraform or something similar (or even Vagrant?)
+
+TODO: Use Dockerfile.fast-jar and ./mvnw package -Dquarkus.package.type=fast-jar available in later Quarkus versions?

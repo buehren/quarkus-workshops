@@ -6,7 +6,7 @@ function run
     if [[ "$SUPERHERO_SERVICES" == "" ]]; then
         export SUPERHERO_SERVICES=$SUPERHERO_SERVICES_ALL
     fi
-    env | grep SUPERHERO_SERVICES
+    env | grep SUPERHERO_SERVICES | sort
 }
 
 (return 0 2>/dev/null) && sourced=1 || sourced=0

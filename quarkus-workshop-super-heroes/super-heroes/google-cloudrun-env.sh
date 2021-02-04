@@ -2,14 +2,8 @@
 
 #oldsetstate="$(set +o)" # POSIXly store all set options.
 
-function set_variables
+function run
 {
-    [[ $_ != $0 ]] || {
-        echo "Please start this script like that:"
-        echo "    source $0"
-        return 1;
-    }
-
     # GCLOUD_PROJECT_ID
     GCLOUD_PROJECT_ID=$( gcloud config list --format 'value(core.project)' )
     echo "GCLOUD_PROJECT_ID=$GCLOUD_PROJECT_ID"
@@ -74,6 +68,11 @@ function set_variables
 
 #set +e
 
-set_variables || ( echo "An ERROR occured!"; false )
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+if [[ $sourced == 1 ]]; then
+    run || ( echo "An ERROR occured!"; false )
+else
+    echo "Please start this script with source ..."; false
+fi
 
 #set -vx; eval "$oldsetstate" > /dev/null # restore all options stored.

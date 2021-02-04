@@ -7,17 +7,9 @@
 #   rest-fight/src/main/resources/META-INF/resources/super-heroes
 # when changing files on the host!
 
-cd rest-hero && \
-mvn clean package -DskipTests $MAVEN_EXTRA_ARGS && \
-cd .. && \
-cd rest-villain && \
-mvn clean package -DskipTests $MAVEN_EXTRA_ARGS && \
-cd .. && \
-cd rest-fight && \
-cp -R ../ui-super-heroes/dist/* src/main/resources/META-INF/resources && \
-mvn clean package -DskipTests $MAVEN_EXTRA_ARGS && \
-ls -d src/main/resources/META-INF/resources/super-heroes && \
-cd .. && \
-cd event-statistics && \
-mvn clean package -DskipTests $MAVEN_EXTRA_ARGS && \
-cd ..
+function run
+{
+    ./mvn_all.sh "BUILD JAR" "clean package" "$MAVEN_EXTRA_ARGS"
+}
+
+run || ( echo "An ERROR occured!"; false )
