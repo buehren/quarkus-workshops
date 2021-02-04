@@ -17,7 +17,7 @@ function run
     for service in $SUPERHERO_SERVICES ui-super-heroes; do
         echo "======================================= RUN JAR: $service ======================================= " && \
         echo "Starting $service in background"
-        java -jar $service/target/$service-01-runner.jar &>> /tmp/$service.jar.out &
+        java $JAVA_EXTRA_ARGS -jar $service/target/$service-01-runner.jar &>> /tmp/$service.jar.out &
     done
 
     echo ""
