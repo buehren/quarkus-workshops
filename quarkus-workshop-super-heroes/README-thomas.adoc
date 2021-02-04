@@ -195,7 +195,7 @@ while running the service in JVM mode. This was already done, and the resulting 
 is enabled in this project. +
 -> In <<native-image-agent>> we will see how that works.
 
-===== Populate and access Google Cloud SQL database from local host
+===== Populate Google Cloud SQL database from localhost
 
 1. Set environment, start Google Cloud SQL Proxy:
 +
@@ -203,24 +203,19 @@ is enabled in this project. +
 ----
 cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 
-source superhero-services-env.sh
-source google-cloudrun-env.sh
-source google-cloudsql-env.sh
-source kafka-env.sh
-
-sudo service cloud-sql-proxy start
+source google-cloudsql-local-env.sh
 ----
 
 2. (Re-)Create database tables and insert content from `import.sql` into the Google Cloud SQL Database using Quarkus DEV mode.
 +
-IMPORTANT: The following code starts each service that recreate
+IMPORTANT: The following code starts each service in dev-mode to delete and (re-)create
 the tables and insert data into the Google Cloud SQL database. +
+ +
 Press CTRL+C (once) for each service after they have started and finished the inserts.
 +
 [source%nowrap,bash]
 ----
 for service in $SUPERHERO_SERVICES; do
-  source google-cloudsql-datasource-env.sh $service && \
   cd $service && \
   mvn clean quarkus:dev \
       -Pgooglecloud \
@@ -231,29 +226,53 @@ for service in $SUPERHERO_SERVICES; do
 done
 ----
 
-3. Access Google Cloud SQL Database from local host. [[localhost-accessing-googlecloudsql]]
+3. Stop Google Cloud SQL proxy:
 +
-TIP: In case the JVM mode works but the native mode produces strange exceptions,
+[source%nowrap,bash]
+----
+sudo service cloud-sql-proxy stop
+----
+
+==== Run on localhost with access to Google Cloud SQL database and Kafka in Confluent Cloud [[run-local-with-cloud-db]]
+
+1. Set environment, start Google Cloud SQL Proxy:
++
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+source google-cloudsql-local-env.sh
+----
+
+2. Run services with access to Google Cloud SQL Database from localhost:
++
+TIP: If the JVM mode works but the native mode produces strange exceptions,
 it might help to repeat <<native-image-agent>> -- maybe a new library version
 needs to be analyzed dynamically.
 +
 [source%nowrap,bash]
 ----
+./stop-jars-all.sh
+./stop-native-all.sh
+
 ./build-ui.sh
 
-# JVM
-./stop-jars-all.sh
+
+# To build JARs and run in JVMs:
+
 ./build-jars-all.sh && ./run-jars-all.sh
-# ...
+# now try the services
 ./stop-jars-all.sh
 
-# Native
+
+# To build and run native executables:
+
 ./build-native-all.sh && ./run-native-all.sh
-# ...
+# now try the services
 ./stop-native-all.sh
 ----
 
-4. Stop Google Cloud SQL proxy:
+3. Stop Google Cloud SQL proxy:
 +
 [source%nowrap,bash]
 ----
@@ -283,94 +302,112 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 ./google-cloudrun-deploy-all.sh jvm
 ----
 
-==== Analyze external library with GraalVM native image agent [[native-image-agent]]
+==== Configure external libraries for GraalVM with native image agent [[native-image-agent]]
 
 #TODO#
 
 As described in <<google-cloud-sql-background>> ....
 
 
-https://github.com/oracle/graal/blob/master/substratevm/Reflection.md
-https://github.com/oracle/graal/blob/master/substratevm/Resources.md
-https://medium.com/graalvm/introducing-the-tracing-agent-simplifying-graalvm-native-image-configuration-c3b56c486271
-https://www.graalvm.org/reference-manual/native-image/BuildConfiguration/#assisted-configuration-of-native-image-builds
-https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/issues/217
-https://github.com/quarkusio/quarkus/pull/6634
-https://stackoverflow.com/questions/63091045/invalid-jwt-failed-audience-check-when-using-google-api-services-in-graalvm-n
-https://github.com/Taig/flog/blob/cfeff44/modules/stackdriver-http/src/main/resources/META-INF/native-image/io.taig/flog-stackdriver-http/reflect-config.json
-https://github.com/quarkusio/quarkus-quickstarts/compare/master...norrs:mysql_cloudrun_cloudsql
+* https://github.com/oracle/graal/blob/master/substratevm/Reflection.md
+* https://github.com/oracle/graal/blob/master/substratevm/Resources.md
+* https://medium.com/graalvm/introducing-the-tracing-agent-simplifying-graalvm-native-image-configuration-c3b56c486271
+* https://www.graalvm.org/reference-manual/native-image/BuildConfiguration/#assisted-configuration-of-native-image-builds
+* https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/issues/217
+* https://github.com/quarkusio/quarkus/pull/6634
+* https://stackoverflow.com/questions/63091045/invalid-jwt-failed-audience-check-when-using-google-api-services-in-graalvm-n
+* https://github.com/Taig/flog/blob/cfeff44/modules/stackdriver-http/src/main/resources/META-INF/native-image/io.taig/flog-stackdriver-http/reflect-config.json
+* https://github.com/quarkusio/quarkus-quickstarts/compare/master...norrs:mysql_cloudrun_cloudsql
 
 
+1. Start all services locally in JVMs as described in <<run-local-with-cloud-db>>.
+
+2. Repeat the following for all services or all services that do not work as native executable
+(`rest-hero` is used in this example):
+
+a. Set environment variables for accessing Google Cloud SQL and Kafka in Confluent Cloud:
++
 [source%nowrap,bash]
 ----
 cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 
+source ./google-cloudsql-local-env.sh
+----
 
-TOOD: Script für jvm-build mit google-optionen
+b. Restart one service with the GraalVM native image agent enabled:
++
+[source%nowrap,bash]
+----
+# Define the service to be stopped and started:
+export SUPERHERO_SERVICES="rest-hero"
 
-TODO: Script für ausführung mit agentlib!
+# Stop the service:
+./stop-jars-all.sh
 
-TODO: Klassen aus reflect-config.json ignorieren, die in einem service nicht vorhanden sind??
+# Restart the service with the GraalVM native image agent enabled:
+export JAVA_EXTRA_ARGS="-agentlib:native-image-agent=config-merge-dir=/home/vagrant/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent/,config-write-period-secs=30"
+./run-jars-all.sh
+----
 
-TODO: lokale Klassen aus io.quarkus.workshop.superheroes ignorieren!
-      (vermutlich nicht nötig wenn fehlende klassen aus reflect-config.json ignoriert werden)
+c. Now use all functionality of the current service.
 
+d. Stop the service:
++
+[source%nowrap,bash]
+----
+./stop-jars-all.sh
+----
 
-source ./google-cloudrun-env.sh
+e. Copy the results of the GraalVM native image agent from the VM to your host:
++
+[source%nowrap,bash]
+----
+# On host:
+cd C:\.....\quarkus\quarkus-workshops\quarkus-workshop-super-heroes\super-heroes
 
-export SUPERHERO_SERVICES="rest-hero rest-villain rest-fight event-statistics"
+scp vagrant@192.168.42.12:/home/vagrant/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent/*  ./graal-native-image-agent/
+----
 
-sudo service cloud-sql-proxy start
+f. Copy `reflect-config.json` and `resource-config.json`
+`from graal-native-image-agent/` to `rest-hero/src/main/resources/`
+(replace `rest-hero` with the current service). +
++
+Fix syntax in `resource-config.json` (if still necessary, maybe works with newer GraalVM in Quarkus).
++
+- TODO: Use the same directory of configuration files for all services to avoid copying to each service.
+- TODO: The following interfaces were added manually - this seems to be a bug/misbehaviour of resteasy: +
+org.jboss.resteasy.microprofile.config.*ConfigSource +
+https://github.com/quarkusio/quarkus/issues/9086 +
+https://github.com/quarkusio/quarkus/issues/5492
 
-for service in $SUPERHERO_SERVICES; do
-  source google-cloudsql-datasource-env.sh $service && \
-  cd $service && \
-  mvn clean package -DskipTests && \
-  java -jar target/$service-01-runner.jar -Dquarkus.profile=googlecloud
-  cd ..
-done
+g. Run `vagrant rsync` on the host to copy the changes to the VM.
 
-cd rest-hero
-mvn clean package -Pnative -Dnative-image.docker-build=true -DskipTests
-target/rest-hero-01-runner -Dquarkus.profile=googlecloud
-# will fail
+h. Build the current service as *native* executable and test it locally:
+- `SUPERHERO_SERVICES` must still contain the current service only.
+- Then follow the steps for native executable here: <<run-local-with-cloud-db>>.
 
-mvn clean package -DskipTests
-java \
-  -agentlib:native-image-agent=config-merge-dir=~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent \
-  -Dquarkus.profile=googlecloud
-  -jar target/rest-hero-01-runner.jar
+i. Repeat these steps for all services (that require an updated GraalVM configuration).
 
+3. To finally clean up and stop all services:
++
+[source%nowrap,bash]
+----
+export SUPERHERO_SERVICES=""
+export JAVA_EXTRA_ARGS=""
 
-# Play around
-
-# rest-hero-01-runner should work now
-
-TODO: Build native for Google + try locally
-
-# Build native executables for Google Cloud Run / Google Cloud SQL:
-# (NOT NECESSARY if your last build was native with the googlecloudsql environment variables set)
-./build-ui.sh && ./google-cloudrun-build-native-all.sh
-
+./stop-jars-all.sh
+./stop-native-all.sh
 
 sudo service cloud-sql-proxy stop
 ----
 
-Now run the native services locally with access to Google Cloud SQL to test them (see <<localhost-accessing-googlecloudsql, here>>).
+_(Maybe it would be possible to run all services at the same time with the agent enabled,
+but maybe that would damage the files written to the config merge directory)._
 
-Copy the results of the GraalVM native image agent from the VM to your host:
 
-[source%nowrap,bash]
-----
-# On host:
-C:\Users\tbuehren\Documents\buehren\learn\jvm\quarkus\quarkus-workshops\quarkus-workshop-super-heroes\super-heroes\rest-hero\src\main\resources\native-config>
 
-scp \
-  vagrant@192.168.42.12:/home/vagrant/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/graal-native-image-agent/* \
-  .\super-heroes\super-heroes\graal-native-image-agent\
-----
 
-==== Build and deploy native to Google Cloud Run
+==== Build and deploy native executables to Google Cloud Run
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
  +
@@ -396,7 +433,6 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 ==== Send requests
 
 #TODO#
-
 
 
 time curl $SERVICE_REST_HERO_URL/api/heroes/random
@@ -435,49 +471,43 @@ playbook-kubernetes-knative-local.yml
 
 == TO DO
 
-EXPOSE 8080
-
-
-quarkus-workshop-super-heroes/super-heroes/event-statistics/src/main/resources/META-INF/resources/index.html
-var top = new WebSocket("wss://" + host + "/stats/winners"); // for running in Google Cloud Run: wss // for running in local VM: ws
-var team = new WebSocket("wss://" + host + "/stats/team"); // for running in Google Cloud Run: wss // for running in local VM: ws
-
-quarkus-workshop-super-heroes/super-heroes/ui-super-heroes/src/app/shared/api/fight.service.ts
-protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
-
-
 done: Profil für Google Cloud Run-Konfiguration
 
 done: Kafka
 
 done: Scripte + Anleitung für JVM Build + Deploy auf Google Cloud Run
 
+done: Native GraalVM configuration für rest-fight und event-statistics
+
+done: Script für ausführung mit agentlib für Graal-Agent!
+
+#TODO: umstellung auf quarkus 1.11, Dev UI?#
+
+#TODO: umstellung auf RESTEasy Reactive#
+
 #TODO: commit#
 
-#TODO: Native GraalVM configuration für rest-fight und event-statistics#
+#TODO: Describe or automate required changes for local vs. cloud execution#
+----
+quarkus-workshop-super-heroes/super-heroes/event-statistics/src/main/resources/META-INF/resources/index.html
+var top = new WebSocket("wss://" + host + "/stats/winners"); // for running in Google Cloud Run: wss // for running in local VM: ws
+var team = new WebSocket("wss://" + host + "/stats/team"); // for running in Google Cloud Run: wss // for running in local VM: ws
+
+quarkus-workshop-super-heroes/super-heroes/ui-super-heroes/src/app/shared/api/fight.service.ts
+protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
+----
+
+
 
 TODO: event-statistics ui websocket timeout handling
 
-TODO: umstellung auf quarkus 1.11, Dev UI?
-
-TODO: umstellung auf RESTEasy Reactive
-
-
-
-
 TODO: Knative Eventing (Cloud Run Eventing) nutzen statt Kafka direkt?
 
-
 TODO: Secrets (z.B. DB-Passwords, Kafka-Secret) sicher speichern (insb. nicht in variablen in cloud run)
-
 
 TODO: Google Cloud SQL über public IP verbinden und firewall-regeln dafür einrichten?
 "This guide will help you through the fourth possibility: connecting using service account."  https://github.com/quarkusio/quarkus/pull/6634/files
 I don't think this is necessarily a blocker, as Cloud Run now has Serverless VPC access in beta. This means it's possible to connect directly to Cloud SQL via Private IP without the use of this library.
-
-
-
-
 
 lokales Knative:
 - TODO: workshop-Images als Services installieren
@@ -498,9 +528,10 @@ HIER: https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker
 
 TODO: yaml statt gcloud-Kommandozeile?
 
-
 TODO: Oder eigene Container bauen und hochladen: C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\README.md
+
 TODO: Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
+
 
 TODO: Dieses Wissen zentral ablegen
 
