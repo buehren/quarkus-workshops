@@ -2,6 +2,8 @@
 
 # Before this, start the infrastructure services:
 #     ./run-infrastructure.sh
+# ...and maybe clean all:
+#     ./clean-all.sh
 # ...and build the UI:
 #     ./build-ui.sh
 
@@ -9,42 +11,25 @@
 #   rest-fight/src/main/resources/META-INF/resources/super-heroes
 # when changing files on the host!
 
-set -e
+function run
+{
+    ./mvn-all.sh "COMPILING" "compile" "$MAVEN_EXTRA_ARGS"
 
-cd rest-hero
-mvn clean compile $MAVEN_EXTRA_ARGS
-echo "Starting Hero Service in background"
-mvn quarkus:dev -Ddebug=false $MAVEN_EXTRA_ARGS &>> /tmp/rest-hero.dev.out &
-cd ..
+    source superhero-services-env.sh || return
 
-cd rest-villain
-mvn clean compile $MAVEN_EXTRA_ARGS
-echo "Starting Villain Service in background"
-mvn quarkus:dev -Ddebug=false $MAVEN_EXTRA_ARGS &>> /tmp/rest-villain.dev.out &
-cd ..
+    for service in $SUPERHERO_SERVICES ui-super-heroes; do
+        echo "======================================= START DEV MODE: $service ======================================= " && \
+        echo "Starting $service quarkus:dev in background"
+        cd $service  || return 1
+        mvn quarkus:dev -Ddebug=false &>> /tmp/$service.dev.out &
+        cd ..  || return 1
+    done
 
-cd ui-super-heroes
-mvn clean compile $MAVEN_EXTRA_ARGS
-echo "Starting UI in background (not really necessary because UI is available in rest-fight service)"
-mvn quarkus:dev -Ddebug=false $MAVEN_EXTRA_ARGS &>> /tmp/ui-super-heroes.dev.out &
-cd ..
+    echo ""
+    echo "Log outputs: tail -n 10 -F /tmp/*.dev.out"
+    echo ""
 
-cd rest-fight
-cp -R ../ui-super-heroes/dist/* src/main/resources/META-INF/resources
-mvn clean compile $MAVEN_EXTRA_ARGS
-echo "Starting Fight Service in background"
-mvn quarkus:dev -Ddebug=false $MAVEN_EXTRA_ARGS &>> /tmp/rest-fight.dev.out &
-ls -d src/main/resources/META-INF/resources/super-heroes
-cd ..
+    ./show-urls.sh
+}
 
-cd event-statistics
-mvn clean compile $MAVEN_EXTRA_ARGS
-echo "Starting Event-Statistics Service in background"
-mvn quarkus:dev -Ddebug=false $MAVEN_EXTRA_ARGS &>> /tmp/event-statistics.dev.out &
-cd ..
-
-echo ""
-echo "Log outputs: tail -n 10 -F /tmp/*.dev.out"
-echo ""
-
-./show-urls.sh
+run || ( echo "An ERROR occured!"; false )
