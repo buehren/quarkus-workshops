@@ -22,7 +22,7 @@ cd ~/prj/quarkus/ansible && \
 ansible-playbook ~/prj/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/ansible/playbook.yml
 ----
 
-=== Local build + run
+=== Local build & run (DEV mode, JVM, Native, Docker)
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
  +
@@ -37,29 +37,37 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 ./run-infrastructure.sh
 ./build-ui.sh
 
-# This populates the database on start - enable this once when starting with empty database:
-export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=drop-and-create
 
-# Build and run in dev mode:
+# This populates the database on start - enable this once when starting with empty database:
+#export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=drop-and-create
+
+# Build and run in Quarkus DEV mode:
+./clean-all.sh
 ./run-dev-all.sh
-# Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
-# :8085 does not work in dev mode!!
+# - Now visit the displayed URLs (use 192.168.42.12 instead of localhost).
+# - You can make changes in the source code, and Quarkus does a hot replace
+#   either at once or on the next HTTP request!
+# - Try the Dev UI:
+#   http://192.168.42.12:8082/q/dev/
+#   http://192.168.42.12:8085/q/dev/
 ./stop-dev-all.sh
 
-unset QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION
-export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION
+export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=""
 
-# Build and run runner-jars:
+
+# Build and run JARs in JVMs:
 ./build-jars-all.sh
 ./run-jars-all.sh
 # Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
 ./stop-jars-all.sh
+
 
 # Build and run native executables:
 ./build-native-all.sh
 ./run-native-all.sh
 # Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
 ./stop-native-all.sh
+
 
 # Build and run Docker images:
 ./build-docker-all.sh
@@ -481,7 +489,7 @@ done: Native GraalVM configuration für rest-fight und event-statistics
 
 done: Script für ausführung mit agentlib für Graal-Agent!
 
-#TODO: umstellung auf quarkus 1.11, Dev UI?#
+done: umstellung auf quarkus 1.11, Dev UI?
 
 #TODO: umstellung auf RESTEasy Reactive#
 
@@ -497,6 +505,8 @@ quarkus-workshop-super-heroes/super-heroes/ui-super-heroes/src/app/shared/api/fi
 protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
 ----
 
+
+TODO: startup time google postgresql
 
 
 TODO: event-statistics ui websocket timeout handling
