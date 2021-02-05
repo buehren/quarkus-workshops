@@ -5,8 +5,8 @@
 # ...and build the UI and JARs:
 #     ./build-ui.sh
 #     ./build-jars-all.sh
-# ...and run the services in dev mode to create database records (required only once):
-#     ./run-dev-all.sh
+# ...and create database records (required only once):
+#     QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION="drop-and-create" ./run-dev-all.sh
 # ...and kill the services running in dev mode:
 #     ./stop-dev-all.sh
 

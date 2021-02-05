@@ -6,6 +6,8 @@
 #     ./clean-all.sh
 # ...and build the UI:
 #     ./build-ui.sh
+# ...and create database records (required only once):
+#     QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION="drop-and-create" ./run-dev-all.sh
 
 # You should STOP "vagrant rsync-auto" while running this to avoid deletion of
 #   rest-fight/src/main/resources/META-INF/resources/super-heroes
