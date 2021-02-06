@@ -40,6 +40,14 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
     && chmod 540 /deployments/run-java.sh \
     && echo "securerandom.source=file:/dev/urandom" >> /etc/alternatives/jre/lib/security/java.security
 
+# Add Google Cloud SQL Proxy to Container to enable access to Google Cloud SQL (PostgreSQL)
+# without com.google.cloud.sql.postgres.SocketFactory (that is incompatible with the Reactive PostgreSQL Client).
+# But this slows down the container startup.
+ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
+RUN chmod "ogu+x" /usr/local/bin/cloud_sql_proxy && \
+    chown 1001 /usr/local/bin/cloud_sql_proxy
+
+
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 COPY target/lib/* /deployments/lib/
@@ -49,6 +57,14 @@ ARG PORT=8080
 ENV PORT="${PORT}"
 EXPOSE ${PORT}
 
+RUN echo "#!/bin/sh" > ./run.sh && \
+    echo "cloud_sql_proxy -instances=\$SERVICE_REST_HERO_DATASOURCE_INSTANCE_CONNECTION_NAME=tcp:5432 &" >> ./run.sh && \
+    echo "/deployments/run-java.sh" >> ./run.sh && \
+    chmod "ogu+x" ./run.sh && \
+    chown 1001 ./run.sh
+
 USER 1001
 
-ENTRYPOINT [ "/deployments/run-java.sh" ]
+#CMD ["./run.sh"]
+ENTRYPOINT [ "./run.sh" ]
+#ENTRYPOINT [ "/deployments/run-java.sh" ]
