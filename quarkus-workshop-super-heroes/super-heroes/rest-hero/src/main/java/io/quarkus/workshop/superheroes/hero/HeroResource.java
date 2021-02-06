@@ -1,6 +1,9 @@
 // tag::adocResource[]
 package io.quarkus.workshop.superheroes.hero;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+
 // end::adocResource[]
 // tag::adocMetricsImports[]
 import org.eclipse.microprofile.metrics.MetricUnits;
@@ -17,15 +20,19 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 // end::adocOpenAPIImports[]
 // tag::adocResource[]
+import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestSseElementType;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.time.Duration;
 import java.util.List;
 
+import static java.time.Duration.*;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
@@ -49,10 +56,13 @@ public class HeroResource {
     // end::adocMetrics[]
     @GET
     @Path("/random")
-    public Response getRandomHero() {
-        Hero hero = service.findRandomHero();
-        LOGGER.debug("Found random hero " + hero);
-        return Response.ok(hero).build();
+    public Uni<Hero> getRandomHero() {
+        LOGGER.info("getRandomHero: Start");
+
+        Uni<Hero> hero = service.findRandomHero();
+
+        LOGGER.info("getRandomHero: Returning hero: " + hero);
+        return hero;
     }
     // end::adocMetricsMethods[]
 
@@ -66,11 +76,70 @@ public class HeroResource {
     @Timed(name = "timeGetAllHeroes", description = "Times how long it takes to invoke the getAllHeroes method", unit = MetricUnits.MILLISECONDS)
     // end::adocMetrics[]
     @GET
-    public Response getAllHeroes() {
-        List<Hero> heroes = service.findAllHeroes();
-        LOGGER.debug("Total number of heroes " + heroes);
-        return Response.ok(heroes).build();
+    public Multi<Hero> getAllHeroes() {
+        LOGGER.info("getAllHeroes: Start");
+
+        Multi<Hero> heroes = service.findAllHeroes();
+        LOGGER.info("getAllHeroes: Returning all heroes: " + heroes);
+        return heroes;
     }
+
+    @Path("/delayed")
+    @GET
+    public Multi<Hero> getAllHeroesDelayed() {
+        LOGGER.info("getAllHeroesDelayed: Start");
+
+        Multi<Hero> heroes = service
+            .findAllHeroes()
+            .onItem().call(i ->
+                // Delay the emission until the returned uni emits its item
+                Uni.createFrom().nullItem().onItem().delayIt().by(Duration.ofMillis(1000))
+            );
+
+        LOGGER.info("getAllHeroesDelayed: Returning all heroes (delayed): " + heroes);
+
+        return heroes;
+    }
+
+    @Path("/delayed/sse")
+    @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @RestSseElementType(MediaType.APPLICATION_JSON)
+    public Multi<Hero> getAllHeroesDelayedSSE() {
+        LOGGER.info("getAllHeroesDelayedSSE: Start");
+
+        Multi<Hero> heroes = service
+            .findAllHeroes()
+            .onItem().call(i ->
+                // Delay the emission until the returned uni emits its item
+                Uni.createFrom().nullItem().onItem().delayIt().by(Duration.ofMillis(1000))
+            );
+
+        LOGGER.info("getAllHeroesDelayedSSE: Returning all heroes (delayed): " + heroes);
+
+        return heroes;
+    }
+
+    /*
+    // https://github.com/quarkusio/quarkus/issues/13794
+    // https://quarkus.io/guides/reactive-messaging-http.html#websockets
+    @Outgoing("heroes-delayed-out")
+    public Multi<Hero> getAllHeroesDelayedWebsocket() {
+        LOGGER.info("getAllHeroesDelayedWebsocket: Start");
+
+        Multi<Hero> heroes = service
+            .findAllHeroes()
+            .onItem().call(i ->
+                // Delay the emission until the returned uni emits its item
+                Uni.createFrom().nullItem().onItem().delayIt().by(Duration.ofMillis(1000))
+            );
+
+        LOGGER.info("getAllHeroesDelayedWebsocket: Returning all heroes (delayed): " + heroes);
+
+        return heroes;
+    }
+*/
+
 
     // tag::adocOpenAPI[]
     @Operation(summary = "Returns a hero for a given identifier")
@@ -83,19 +152,17 @@ public class HeroResource {
     // end::adocMetrics[]
     @GET
     @Path("/{id}")
-    public Response getHero(
+    public Uni<Response> getHero(
         // tag::adocOpenAPI[]
         @Parameter(description = "Hero identifier", required = true)
         // end::adocOpenAPI[]
         @PathParam("id") Long id) {
-        Hero hero = service.findHeroById(id);
-        if (hero != null) {
-            LOGGER.debug("Found hero " + hero);
-            return Response.ok(hero).build();
-        } else {
-            LOGGER.debug("No hero found with id " + id);
-            return Response.noContent().build();
-        }
+        Uni<Hero> hero = service.findHeroById(id);
+        return hero
+            //.onItem().delayIt().by(Duration.ofMillis(100))
+            .onItem().transform(item -> Response.ok(hero).build())
+            .ifNoItem().after(ofSeconds(1)).recoverWithUni(Uni.createFrom().item(Response.noContent().build()))
+            .onFailure().transform(failure -> new ServiceUnavailableException(failure.getMessage(), Response.serverError().build(), failure));
     }
 
     // tag::adocOpenAPI[]
@@ -127,14 +194,12 @@ public class HeroResource {
     @Timed(name = "timeUpdateHero", description = "Times how long it takes to invoke the updateHero method", unit = MetricUnits.MILLISECONDS)
     // end::adocMetrics[]
     @PUT
-    public Response updateHero(
+    public Uni<Hero> updateHero(
         // tag::adocOpenAPI[]
         @RequestBody(required = true, content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = Hero.class)))
         // end::adocOpenAPI[]
         @Valid Hero hero) {
-        hero = service.updateHero(hero);
-        LOGGER.debug("Hero updated with new valued " + hero);
-        return Response.ok(hero).build();
+        return service.updateHero(hero);
     }
 
     // tag::adocOpenAPI[]

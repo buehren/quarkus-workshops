@@ -1,7 +1,7 @@
 // tag::adocEntity[]
 package io.quarkus.workshop.superheroes.hero;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 
 import java.util.Random;
 // end::adocEntity[]
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 
@@ -32,11 +33,8 @@ public class Hero extends PanacheEntity {
     public String powers;
 
     // tag::adocFindRandom[]
-    public static Hero findRandom() {
-        long countHeroes = Hero.count();
-        Random random = new Random();
-        int randomHero = random.nextInt((int) countHeroes);
-        return Hero.findAll().page(randomHero, 1).firstResult();
+    public static Uni<Hero> findRandom() {
+        return Hero.find("ORDER BY random()").firstResult();
     }
     // end::adocFindRandom[]
 

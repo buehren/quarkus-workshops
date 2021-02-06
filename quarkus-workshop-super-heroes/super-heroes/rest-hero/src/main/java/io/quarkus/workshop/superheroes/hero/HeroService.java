@@ -2,12 +2,13 @@
 package io.quarkus.workshop.superheroes.hero;
 
 // end::adocTransactional[]
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 // tag::adocTransactional[]
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.List;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.SUPPORTS;
@@ -22,22 +23,18 @@ public class HeroService {
     // end::adocConfigProperty[]
 
     @Transactional(SUPPORTS)
-    public List<Hero> findAllHeroes() {
-        return Hero.listAll();
+    public Multi<Hero> findAllHeroes() {
+        return Hero.streamAll();
     }
 
     @Transactional(SUPPORTS)
-    public Hero findHeroById(Long id) {
+    public Uni<Hero> findHeroById(Long id) {
         return Hero.findById(id);
     }
 
     @Transactional(SUPPORTS)
-    public Hero findRandomHero() {
-        Hero randomHero = null;
-        while (randomHero == null) {
-            randomHero = Hero.findRandom();
-        }
-        return randomHero;
+    public Uni<Hero> findRandomHero() {
+        return Hero.findRandom();
     }
 
     // tag::adocPersistHero[]
@@ -50,19 +47,21 @@ public class HeroService {
     }
     // end::adocPersistHero[]
 
-    public Hero updateHero(@Valid Hero hero) {
-        Hero entity = Hero.findById(hero.id);
-        entity.name = hero.name;
-        entity.otherName = hero.otherName;
-        entity.level = hero.level;
-        entity.picture = hero.picture;
-        entity.powers = hero.powers;
+    public Uni<Hero> updateHero(@Valid Hero hero) {
+        Uni<Hero> entity = Hero.findById(hero.id);
+        entity.onItem().transform(heroItem -> {
+            heroItem.name = hero.name;
+            heroItem.otherName = hero.otherName;
+            heroItem.level = hero.level;
+            heroItem.picture = hero.picture;
+            heroItem.powers = hero.powers;
+            return heroItem.persist();
+        });
         return entity;
     }
 
     public void deleteHero(Long id) {
-        Hero hero = Hero.findById(id);
-        hero.delete();
+        Hero.deleteById(id);
     }
 }
 // end::adocTransactional[]

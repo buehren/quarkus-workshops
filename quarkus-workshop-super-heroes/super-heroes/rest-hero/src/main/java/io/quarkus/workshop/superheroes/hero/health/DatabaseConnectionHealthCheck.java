@@ -25,8 +25,8 @@ public class DatabaseConnectionHealthCheck implements HealthCheck {
             .named("Hero Datasource connection health check");
 
         try {
-            List<Hero> heroes = heroService.findAllHeroes();
-            responseBuilder.withData("Number of heroes in the database", heroes.size()).up();
+            long heroesCount = heroService.findAllHeroes().subscribe().asStream().count();
+            responseBuilder.withData("Number of heroes in the database", heroesCount).up();
         } catch (IllegalStateException e) {
             responseBuilder.down();
         }
