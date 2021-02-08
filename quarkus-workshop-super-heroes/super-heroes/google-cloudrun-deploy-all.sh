@@ -42,6 +42,10 @@ function run
             var_timeout=40
             var_memory=512Mi
         fi
+        if [ "$service" == "rest-hero" ]; then
+            # extended timeout for long running http response or server sent events (SSE) or websockets
+            var_timeout=300
+        fi
         if [ "$service" == "event-statistics" ]; then
             # extended timeout for event-statistics websockets
             var_timeout=300
