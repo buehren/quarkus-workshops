@@ -1,7 +1,9 @@
 {
   "resources": [
+    {"pattern":"\\QMETA-INF/native/libnetty_transport_native_epoll_x86_64.so\\E"},
     {"pattern":"\\QMETA-INF/quarkus-generated-openapi-doc.JSON\\E"},
     {"pattern":"\\QMETA-INF/resources/index.html\\E"},
+    {"pattern":"\\QMETA-INF/services/io.smallrye.config.ConfigSourceFactory\\E"},
     {"pattern":"\\QMETA-INF/services/io.smallrye.config.SmallRyeConfigFactory\\E"},
     {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.BufferFactory\\E"},
     {"pattern":"\\QMETA-INF/services/io.vertx.core.spi.FutureFactory\\E"},
