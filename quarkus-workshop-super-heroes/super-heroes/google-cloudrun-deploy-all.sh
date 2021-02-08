@@ -23,7 +23,7 @@ function run
         cd $service  || return 1
         \cp -pfv src/main/docker/Dockerfile.$DOCKERFILE_TYPE ./Dockerfile  || return 1
         \cp -pfv src/main/gcloud/.gcloudignore.$DOCKERFILE_TYPE ./.gcloudignore  || return 1
-        gcloud builds submit --tag gcr.io/$GCLOUD_PROJECT_ID/$service  || return 1
+        gcloud builds submit --tag eu.gcr.io/$GCLOUD_PROJECT_ID/$service  || return 1
         cd .. || return 1
     done
 
@@ -57,7 +57,7 @@ function run
         var_datasource_pwd=SERVICE_${SERVICE}_DATASOURCE_PWD
 
         gcloud run deploy $service \
-            --image gcr.io/$GCLOUD_PROJECT_ID/$service \
+            --image eu.gcr.io/$GCLOUD_PROJECT_ID/$service \
             --platform managed \
             --memory=$var_memory \
             --timeout=$var_timeout \
