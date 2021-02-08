@@ -156,25 +156,44 @@
           <value>googlecloud</value>
         </property>
       </activation>
-<!--
       <dependencies>
+<!--
+        <!- -
+        Required for Reactive PostgreSQL client using Unix Socket that is provided by Google Cloud Run
+        (does not -yet- work in native executable):
+        - ->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-kqueue</artifactId>
+            <classifier>osx-x86_64</classifier>
+        </dependency>
+-->
+<!--
+        <!- -
+        Required for Blocking (conventional) PostgreSQL client using Google's Java library with SocketFactory:
+        - ->
         <dependency>
           <groupId>com.google.cloud.sql</groupId>
           <artifactId>postgres-socket-factory</artifactId>
           <version>1.2.0</version>
         </dependency>
+-->
         <dependency>
-                    <!- - https://github.com/quarkusio/quarkus/issues/6327 - ->
+          <!-- https://github.com/quarkusio/quarkus/issues/6327 -->
           <groupId>jakarta.security.jacc</groupId>
           <artifactId>jakarta.security.jacc-api</artifactId>
         </dependency>
         <dependency>
-                    <!- - https://github.com/quarkusio/quarkus/issues/6327 - ->
+          <!-- https://github.com/quarkusio/quarkus/issues/6327 -->
           <groupId>net.java.dev.jna</groupId>
           <artifactId>jna</artifactId>
         </dependency>
       </dependencies>
--->
     </profile>
     <profile>
       <id>native</id>
