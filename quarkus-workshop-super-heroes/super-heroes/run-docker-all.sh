@@ -13,7 +13,7 @@
 #     ./build-docker-all.sh
 
 echo "Starting Services in background"
-docker-compose up -d
+docker-compose up -d "$SUPERHERO_SERVICES"
 
 echo ""
 echo "Log outputs: docker-compose logs -f"
