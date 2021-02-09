@@ -132,9 +132,12 @@ gcloud projects add-iam-policy-binding $GCLOUD_PROJECT_ID \
   --role roles/cloudsql.client
 
 # Create PostgreSQL database instance:
+# TODO: Prepare private IP address before this (currently below) and assign it here already:
+#       --network=default \
+#       --no-assign-ip \
 gcloud sql instances create my-database \
   --tier=db-f1-micro \
-  --region=europe-west3 \
+  --region=$GCLOUD_REGION \
   --assign-ip \
   --database-version=POSTGRES_13 \
   --storage-type=SSD \
@@ -153,9 +156,6 @@ gcloud sql users create superfight --password=superfight --instance=$GCLOUD_DB_I
 
 # Create databases in the postgres console:
 gcloud sql connect $GCLOUD_DB_INSTANCE
-# After "allowlisting your IP for incoming connection for 5 minutes..."
-# you can also use the regular console to connect (within 5 minutes):
-# psql -h $GCLOUD_DB_INSTANCE_IP -U postgres
 
 # Run these commands in the postgres console:
 GRANT superman TO postgres;
@@ -165,6 +165,41 @@ CREATE DATABASE heroes_database OWNER superman;
 CREATE DATABASE villains_database OWNER superbad;
 CREATE DATABASE fights_database OWNER superfight;
 \l
+
+
+# Setup private IP address for database instance
+# https://cloud.google.com/sql/docs/postgres/connect-run#private-ip
+# https://cloud.google.com/sql/docs/postgres/configure-private-ip
+# https://cloud.google.com/sql/docs/postgres/configure-private-services-access
+# https://cloud.google.com/vpc/docs/configure-serverless-vpc-access#creating_a_connector
+
+gcloud services enable servicenetworking.googleapis.com
+gcloud services enable compute.googleapis.com
+gcloud services enable vpcaccess.googleapis.com
+
+gcloud compute addresses create google-managed-services-default \
+    --global \
+    --purpose=VPC_PEERING \
+    --addresses=192.168.100.0 \
+    --prefix-length=24 \
+    --network=default
+
+gcloud services vpc-peerings connect \
+    --service=servicenetworking.googleapis.com \
+    --ranges=google-managed-services-default \
+    --network=default
+
+gcloud beta sql instances patch $GCLOUD_DB_INSTANCE \
+  --network=default \
+  --no-assign-ip
+
+gcloud compute networks vpc-access connectors create my-vpc-connector \
+  --network default \
+  --range 192.168.200.0/28 \
+  --region=$GCLOUD_REGION
+gcloud compute networks vpc-access connectors describe my-vpc-connector \
+  --region=$GCLOUD_REGION
+
 ----
 
 * Install Google Cloud SQL Proxy for accessing the database from the local host:
@@ -491,7 +526,39 @@ done: Script für ausführung mit agentlib für Graal-Agent!
 
 done: umstellung auf quarkus 1.11, Dev UI?
 
-#TODO: umstellung auf RESTEasy Reactive#
+done: umstellung auf RESTEasy Reactive
+
+done: umstellung auf PostgreSQL Reactive
+
+TODO: (when supported by Vertx/Quarkus) PostgreSQL connection over Unix Socket in native executable (instead of private IP address of DB instance)
+
+* https://github.com/quarkusio/quarkus/issues/12460
+* https://stackoverflow.com/questions/62656445/quarkus-datasource-using-unix-socket-is-ignored
+
+[source%nowrap]
+----
+DEBUG [io.qu.ve.co.ru.VertxCoreRecorder] (main) Vertx has Native Transport Enabled: false
+
+@cescoffier and I have been looking into this. We've reproduced the issue in this small example. For epoll native transport to work in native image, it'd seem that we need to pre-register some classes/field/methdos for JNI access, plus we also need #Netty's AbstractReferenceCounted to be initialized at build time#. We haven't fully settled on a solution yet, but the example above shows one way to make it work.
+https://github.com/quarkusio/quarkus/issues/10095
+https://github.com/galderz/mendrugo/blob/332a8d0257dc75a8c62a560c43a8104bb99a59ea/epoll-jni-buildtime/Makefile
+https://github.com/galderz/mendrugo/blob/332a8d0257dc75a8c62a560c43a8104bb99a59ea/epoll-c/Makefile
+
+--initialize-at-run-time=$(runtime) \
+
+runtime=io.netty.channel.epoll.Epoll,$\
+io.netty.channel.epoll.EpollEventArray,$\
+io.netty.channel.epoll.EpollEventLoop,$\
+io.netty.channel.epoll.Native,$\
+io.netty.channel.unix.Errors,$\
+io.netty.channel.unix.IovArray,$\
+io.netty.channel.unix.Limits,$\
+io.netty.channel.unix.Socket
+
+io.netty.channel.epoll.Epoll
+     Epoll.isAvailable();
+     Epoll.unavailabilityCause();
+----
 
 #TODO: commit#
 

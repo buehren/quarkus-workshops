@@ -44,15 +44,16 @@ RUN microdnf install curl ca-certificates ${JAVA_PACKAGE} \
 # Start Google Cloud SQL Proxy in Container to enable access to Google Cloud SQL (PostgreSQL)
 # without Unix Sockets (works with Reactive PostgreSQL Client but incompatible with native executable)
 # and without com.google.cloud.sql.postgres.SocketFactory (incompatible with the Reactive PostgreSQL Client).
-ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
-RUN chmod "ogu+x" /usr/local/bin/cloud_sql_proxy && \
-    chown 1001 /usr/local/bin/cloud_sql_proxy
-RUN mkdir /work/ && \
-    echo "#!/bin/sh" > /work/run.sh && \
-    echo "cloud_sql_proxy -instances=\$SERVICE_REST_HERO_DATASOURCE_INSTANCE_CONNECTION_NAME=tcp:5432 &" >> /work/run.sh && \
-    echo "/deployments/run-java.sh" >> /work/run.sh && \
-    chmod "ogu+x" /work/run.sh && \
-    chown 1001 /work/run.sh
+# (also requires different ENTRYPOINT below!)
+#ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
+#RUN chmod "ogu+x" /usr/local/bin/cloud_sql_proxy && \
+#    chown 1001 /usr/local/bin/cloud_sql_proxy
+#RUN mkdir /work/ && \
+#    echo "#!/bin/sh" > /work/run.sh && \
+#    echo "cloud_sql_proxy -instances=\$SERVICE_REST_HERO_DATASOURCE_INSTANCE_CONNECTION_NAME=tcp:5432 &" >> /work/run.sh && \
+#    echo "/deployments/run-java.sh" >> /work/run.sh && \
+#    chmod "ogu+x" /work/run.sh && \
+#    chown 1001 /work/run.sh
 
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
@@ -66,6 +67,5 @@ EXPOSE ${PORT}
 
 USER 1001
 
-#CMD ["./run.sh"]
-ENTRYPOINT [ "/work/run.sh" ]
-#ENTRYPOINT [ "/deployments/run-java.sh" ]
+#ENTRYPOINT [ "/work/run.sh" ]
+ENTRYPOINT [ "/deployments/run-java.sh" ]

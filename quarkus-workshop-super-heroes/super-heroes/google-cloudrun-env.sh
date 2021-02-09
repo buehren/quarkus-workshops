@@ -4,6 +4,10 @@
 
 function run
 {
+    # GCLOUD_REGION
+    export GCLOUD_REGION="europe-west3"
+    echo "GCLOUD_REGION=$GCLOUD_REGION"
+
     # GCLOUD_PROJECT_ID
     GCLOUD_PROJECT_ID=$( gcloud config list --format 'value(core.project)' )
     echo "GCLOUD_PROJECT_ID=$GCLOUD_PROJECT_ID"

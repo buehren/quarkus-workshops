@@ -52,6 +52,7 @@ function run
         fi
 
         var_datasource_connection_name=SERVICE_${SERVICE}_DATASOURCE_INSTANCE_CONNECTION_NAME
+        var_datasource_instance_ip=SERVICE_${SERVICE}_DATASOURCE_INSTANCE_IP
         var_datasource_dbname=SERVICE_${SERVICE}_DATASOURCE_DBNAME
         var_datasource_user=SERVICE_${SERVICE}_DATASOURCE_USER
         var_datasource_pwd=SERVICE_${SERVICE}_DATASOURCE_PWD
@@ -59,6 +60,7 @@ function run
         gcloud run deploy $service \
             --image eu.gcr.io/$GCLOUD_PROJECT_ID/$service \
             --platform managed \
+            --vpc-connector my-vpc-connector \
             --memory=$var_memory \
             --timeout=$var_timeout \
             --concurrency=50 \
@@ -66,6 +68,7 @@ function run
             --allow-unauthenticated \
             --add-cloudsql-instances $DATASOURCE_INSTANCE_CONNECTION_NAME \
             --update-env-vars SERVICE_${SERVICE}_DATASOURCE_INSTANCE_CONNECTION_NAME=${!var_datasource_connection_name} \
+            --update-env-vars SERVICE_${SERVICE}_DATASOURCE_INSTANCE_IP=${!var_datasource_instance_ip} \
             --update-env-vars SERVICE_${SERVICE}_DATASOURCE_DBNAME=${!var_datasource_dbname} \
             --update-env-vars SERVICE_${SERVICE}_DATASOURCE_USER=${!var_datasource_user} \
             --update-env-vars SERVICE_${SERVICE}_DATASOURCE_PWD=${!var_datasource_pwd} \
