@@ -303,14 +303,14 @@ needs to be analyzed dynamically.
 
 # To build JARs and run in JVMs:
 
-./build-jars-all.sh && ./run-jars-all.sh
+./google-cloudrun-build-jars-all.sh && ./run-jars-all.sh
 # now try the services
 ./stop-jars-all.sh
 
 
 # To build and run native executables:
 
-./build-native-all.sh && ./run-native-all.sh
+./google-cloudrun-build-native-all.sh && ./run-native-all.sh
 # now try the services
 ./stop-native-all.sh
 ----
