@@ -2,6 +2,8 @@
 package io.quarkus.workshop.superheroes.fight;
 
 // end::adocResource[]
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.metrics.MetricUnits;
@@ -19,16 +21,12 @@ import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.List;
 
+import static java.time.Duration.ofSeconds;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
@@ -62,13 +60,11 @@ public class FightResource {
     // end::adocTimeout[]
     @GET
     @Path("/randomfighters")
-    public Response getRandomFighters() throws InterruptedException {
+    public Uni<Fighters> getRandomFighters() throws InterruptedException {
         // tag::adocTimeout[]
         veryLongProcess();
         // end::adocTimeout[]
-        Fighters fighters = service.findRandomFighters();
-        LOGGER.debug("Get random fighters " + fighters);
-        return Response.ok(fighters).build();
+        return service.findRandomFighters();
     }
     // end::adocFaultTolerance[]
 
@@ -80,10 +76,8 @@ public class FightResource {
     @Timed(name = "timeGetAllFights", description = "Times how long it takes to invoke the getAllFights method", unit = MetricUnits.MILLISECONDS)
     // end::adocMetrics[]
     @GET
-    public Response getAllFights() {
-        List<Fight> fights = service.findAllFights();
-        LOGGER.debug("Total number of fights " + fights);
-        return Response.ok(fights).build();
+    public Multi<Fight> getAllFights() {
+        return service.findAllFights();
     }
 
     @Operation(summary = "Returns a fight for a given identifier")
@@ -95,15 +89,13 @@ public class FightResource {
     // end::adocMetrics[]
     @GET
     @Path("/{id}")
-    public Response getFight(@Parameter(description = "Fight identifier", required = true) @PathParam("id") Long id) {
-        Fight fight = service.findFightById(id);
-        if (fight != null) {
-            LOGGER.debug("Found fight " + fight);
-            return Response.ok(fight).build();
-        } else {
-            LOGGER.debug("No fight found with id " + id);
-            return Response.noContent().build();
-        }
+    public Uni<Response> getFight(@Parameter(description = "Fight identifier", required = true) @PathParam("id") Long id) {
+        Uni<Fight> fight = service.findFightById(id);
+        return fight
+            //.onItem().delayIt().by(Duration.ofMillis(100))
+            .onItem().transform(item -> Response.ok(fight).build())
+            .ifNoItem().after(ofSeconds(1)).recoverWithUni(Uni.createFrom().item(Response.noContent().build()))
+            .onFailure().transform(failure -> new ServiceUnavailableException(failure.getMessage(), Response.serverError().build(), failure));
     }
 
     @Operation(summary = "Trigger a fight between two fighters")

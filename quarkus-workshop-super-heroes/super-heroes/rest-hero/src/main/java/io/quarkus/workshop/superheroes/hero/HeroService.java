@@ -23,6 +23,11 @@ public class HeroService {
     // end::adocConfigProperty[]
 
     @Transactional(SUPPORTS)
+    public Uni<Long> getHeroesCount() {
+        return Hero.count();
+    }
+
+    @Transactional(SUPPORTS)
     public Multi<Hero> findAllHeroes() {
         return Hero.streamAll();
     }

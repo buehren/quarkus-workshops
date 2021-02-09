@@ -1,12 +1,13 @@
 // tag::adocTransactional[]
 package io.quarkus.workshop.superheroes.villain;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.List;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.SUPPORTS;
@@ -19,22 +20,23 @@ public class VillainService {
     int levelMultiplier;
 
     @Transactional(SUPPORTS)
-    public List<Villain> findAllVillains() {
-        return Villain.listAll();
+    public Uni<Long> getVillainsCount() {
+        return Villain.count();
     }
 
     @Transactional(SUPPORTS)
-    public Villain findVillainById(Long id) {
+    public Multi<Villain> findAllVillains() {
+        return Villain.streamAll();
+    }
+
+    @Transactional(SUPPORTS)
+    public Uni<Villain> findVillainById(Long id) {
         return Villain.findById(id);
     }
 
     @Transactional(SUPPORTS)
-    public Villain findRandomVillain() {
-        Villain randomVillain = null;
-        while (randomVillain == null) {
-            randomVillain = Villain.findRandom();
-        }
-        return randomVillain;
+    public Uni<Villain> findRandomVillain() {
+        return Villain.findRandom();
     }
 
     public Villain persistVillain(@Valid Villain villain) {
@@ -43,19 +45,21 @@ public class VillainService {
         return villain;
     }
 
-    public Villain updateVillain(@Valid Villain villain) {
-        Villain entity = Villain.findById(villain.id);
-        entity.name = villain.name;
-        entity.otherName = villain.otherName;
-        entity.level = villain.level;
-        entity.picture = villain.picture;
-        entity.powers = villain.powers;
+    public Uni<Villain> updateVillain(@Valid Villain villain) {
+        Uni<Villain> entity = Villain.findById(villain.id);
+        entity.onItem().transform(villainItem -> {
+            villainItem.name = villain.name;
+            villainItem.otherName = villain.otherName;
+            villainItem.level = villain.level;
+            villainItem.picture = villain.picture;
+            villainItem.powers = villain.powers;
+            return villainItem.persist();
+        });
         return entity;
     }
 
     public void deleteVillain(Long id) {
-        Villain villain = Villain.findById(id);
-        villain.delete();
+        Villain.deleteById(id);
     }
 }
 // end::adocTransactional[]

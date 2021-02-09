@@ -2,6 +2,8 @@
 package io.quarkus.workshop.superheroes.villain;
 
 // end::adocResource[]
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -17,20 +19,14 @@ import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.List;
 
+import static java.time.Duration.ofSeconds;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
@@ -52,10 +48,13 @@ public class VillainResource {
     // end::adocMetrics[]
     @GET
     @Path("/random")
-    public Response getRandomVillain() {
-        Villain villain = service.findRandomVillain();
-        LOGGER.debug("Found random villain " + villain);
-        return Response.ok(villain).build();
+    public Uni<Villain> getRandomVillain() {
+        LOGGER.info("getRandomVillain: Start");
+
+        Uni<Villain> villain = service.findRandomVillain();
+
+        LOGGER.info("getRandomVillain: Returning villain: " + villain);
+        return villain;
     }
 
     @Operation(summary = "Returns all the villains from the database")
@@ -66,10 +65,8 @@ public class VillainResource {
     @Timed(name = "timeGetAllVillains", description = "Times how long it takes to invoke the getAllVillains method", unit = MetricUnits.MILLISECONDS)
     // end::adocMetrics[]
     @GET
-    public Response getAllVillains() {
-        List<Villain> villains = service.findAllVillains();
-        LOGGER.debug("Total number of villains " + villains);
-        return Response.ok(villains).build();
+    public Multi<Villain> getAllVillains() {
+        return service.findAllVillains();
     }
 
     @Operation(summary = "Returns a villain for a given identifier")
@@ -81,15 +78,13 @@ public class VillainResource {
     // end::adocMetrics[]
     @GET
     @Path("/{id}")
-    public Response getVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") Long id) {
-        Villain villain = service.findVillainById(id);
-        if (villain != null) {
-            LOGGER.debug("Found villain " + villain);
-            return Response.ok(villain).build();
-        } else {
-            LOGGER.debug("No villain found with id " + id);
-            return Response.noContent().build();
-        }
+    public Uni<Response> getVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") Long id) {
+        Uni<Villain> villain = service.findVillainById(id);
+        return villain
+            //.onItem().delayIt().by(Duration.ofMillis(100))
+            .onItem().transform(item -> Response.ok(villain).build())
+            .ifNoItem().after(ofSeconds(1)).recoverWithUni(Uni.createFrom().item(Response.noContent().build()))
+            .onFailure().transform(failure -> new ServiceUnavailableException(failure.getMessage(), Response.serverError().build(), failure));
     }
 
     @Operation(summary = "Creates a valid villain")
@@ -102,7 +97,7 @@ public class VillainResource {
     public Response createVillain(@RequestBody(required = true, content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = Villain.class)))  @Valid Villain villain, @Context UriInfo uriInfo) {
         villain = service.persistVillain(villain);
         UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(Long.toString(villain.id));
-        LOGGER.debug("New villain created with URI " + builder.build().toString());
+        LOGGER.debug("New villain will be created with URI " + builder.build().toString());
         return Response.created(builder.build()).build();
     }
 
@@ -113,10 +108,8 @@ public class VillainResource {
     @Timed(name = "timeUpdateVillain", description = "Times how long it takes to invoke the updateVillain method", unit = MetricUnits.MILLISECONDS)
     // end::adocMetrics[]
     @PUT
-    public Response updateVillain(@RequestBody(required = true, content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = Villain.class))) @Valid Villain villain) {
-        villain = service.updateVillain(villain);
-        LOGGER.debug("Villain updated with new valued " + villain);
-        return Response.ok(villain).build();
+    public Uni<Villain> updateVillain(@RequestBody(required = true, content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = Villain.class))) @Valid Villain villain) {
+        return service.updateVillain(villain);
     }
 
     @Operation(summary = "Deletes an exiting villain")
@@ -129,7 +122,7 @@ public class VillainResource {
     @Path("/{id}")
     public Response deleteVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") Long id) {
         service.deleteVillain(id);
-        LOGGER.debug("Villain deleted with " + id);
+        LOGGER.debug("Villain will be deleted with " + id);
         return Response.noContent().build();
     }
 

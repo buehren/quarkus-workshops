@@ -1,7 +1,9 @@
 // tag::adocEntity[]
 package io.quarkus.workshop.superheroes.villain;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import javax.persistence.Column;
@@ -9,7 +11,6 @@ import javax.persistence.Entity;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Random;
 
 @Entity
 @Schema(description = "The villain fighting against the hero")
@@ -27,11 +28,8 @@ public class Villain extends PanacheEntity {
     @Column(columnDefinition = "TEXT")
     public String powers;
 
-    public static Villain findRandom() {
-        long countVillains = count();
-        Random random = new Random();
-        int randomVillain = random.nextInt((int) countVillains);
-        return findAll().page(randomVillain, 1).firstResult();
+    public static Uni<Villain> findRandom() {
+        return Villain.find("ORDER BY random()").firstResult();
     }
 
     // tag::adocSkip[]

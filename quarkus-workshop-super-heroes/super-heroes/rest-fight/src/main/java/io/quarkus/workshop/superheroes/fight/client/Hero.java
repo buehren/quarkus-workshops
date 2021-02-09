@@ -1,11 +1,13 @@
 // tag::adocBean[]
 package io.quarkus.workshop.superheroes.fight.client;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import javax.validation.constraints.NotNull;
 
 @Schema(description="The hero fighting against the villain")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hero {
 
     @NotNull

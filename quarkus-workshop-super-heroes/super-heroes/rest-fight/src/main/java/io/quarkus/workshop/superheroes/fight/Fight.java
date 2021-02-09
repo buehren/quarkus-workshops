@@ -1,7 +1,7 @@
 // tag::adocEntity[]
 package io.quarkus.workshop.superheroes.fight;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import javax.persistence.Entity;

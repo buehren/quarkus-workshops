@@ -27,7 +27,7 @@
     <properties>
         <quarkus.version>1.11.1.Final</quarkus.version>
         <quarkus-plugin.version>1.11.1.Final</quarkus-plugin.version>
-        <surefire-plugin.version>2.22.0</surefire-plugin.version>
+        <surefire-plugin.version>2.22.1</surefire-plugin.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
@@ -50,19 +50,19 @@
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy</artifactId>
+            <artifactId>quarkus-resteasy-reactive</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-jsonb</artifactId>
+            <artifactId>quarkus-resteasy-reactive-jsonb</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+            <artifactId>quarkus-hibernate-reactive-panache</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-jdbc-postgresql</artifactId>
+            <artifactId>quarkus-reactive-pg-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -92,6 +92,10 @@
             <artifactId>quarkus-rest-client</artifactId>
         </dependency>
         <!-- end::adocRestClientDependency[] -->
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>smallrye-mutiny-vertx-web-client</artifactId>
+        </dependency>
 
         <!-- Kafka integration -->
         <!-- tag::kafkaDependency[] -->
@@ -159,7 +163,7 @@
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.version}</version>
+                <version>${quarkus-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -191,11 +195,6 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>com.google.cloud.sql</groupId>
-                    <artifactId>postgres-socket-factory</artifactId>
-                    <version>1.2.0</version>
-                </dependency>
-                <dependency>
                     <!-- https://github.com/quarkusio/quarkus/issues/6327 -->
                     <groupId>jakarta.security.jacc</groupId>
                     <artifactId>jakarta.security.jacc-api</artifactId>
@@ -214,7 +213,7 @@
                     <plugin>
                         <groupId>io.quarkus</groupId>
                         <artifactId>quarkus-maven-plugin</artifactId>
-                        <version>${quarkus.version}</version>
+                        <version>${quarkus-plugin.version}</version>
                         <executions>
                             <execution>
                                 <goals>

@@ -1,5 +1,6 @@
 package io.quarkus.workshop.superheroes.fight.health;
 
+import io.quarkus.workshop.superheroes.fight.FightService;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
@@ -17,31 +18,18 @@ import java.sql.Statement;
 public class DatabaseConnectionHealthCheck implements HealthCheck {
 
     @Inject
-    DataSource dataSource;
+    FightService fightService;
 
     @Override
     public HealthCheckResponse call() {
         HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("Fight health check");
         try {
-            int rows = numberOfRows("fight");
-            responseBuilder.up().withData("rows", rows);
+            fightService.getFightsCount().subscribe().with(count ->
+                responseBuilder.withData("Number of fights in the database", count).up());
         } catch (Exception e) {
             responseBuilder.down().withData("message", e.getMessage());
         }
 
         return responseBuilder.build();
-    }
-
-    private int numberOfRows(String table) throws Exception {
-        try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM " + table)
-        ) {
-            if (resultSet.next()) {
-                return resultSet.getInt(1);
-            } else {
-                return 0;
-            }
-        }
     }
 }

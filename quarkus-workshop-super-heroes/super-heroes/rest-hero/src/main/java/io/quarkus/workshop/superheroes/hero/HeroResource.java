@@ -181,7 +181,7 @@ public class HeroResource {
         @Valid Hero hero, @Context UriInfo uriInfo) {
         hero = service.persistHero(hero);
         UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(Long.toString(hero.id));
-        LOGGER.debug("New hero created with URI " + builder.build().toString());
+        LOGGER.debug("New hero will be created with URI " + builder.build().toString());
         return Response.created(builder.build()).build();
     }
 
@@ -218,7 +218,7 @@ public class HeroResource {
         // end::adocOpenAPI[]
         @PathParam("id") Long id) {
         service.deleteHero(id);
-        LOGGER.debug("Hero deleted with " + id);
+        LOGGER.debug("Hero will be deleted with " + id);
         return Response.noContent().build();
     }
 

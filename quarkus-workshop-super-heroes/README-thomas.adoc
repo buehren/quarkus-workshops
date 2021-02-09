@@ -562,6 +562,13 @@ io.netty.channel.epoll.Epoll
 
 #TODO: commit#
 
+TODO: simplify HeroResource.getHero() + the same for Fight and Villain (how to return "no content" header with Uni?)
+TODO: simplify HeroService.updateHero() + the same for Fight and Villain
+
+TODO: Fix local access to Google Cloud SQL: connection timed out: /192.168.100.3:5432
+TODO: check/fix drop-and-create with reactive postgresql client
+TODO: Check DB connection on startup
+
 #TODO: Describe or automate required changes for local vs. cloud execution#
 ----
 quarkus-workshop-super-heroes/super-heroes/event-statistics/src/main/resources/META-INF/resources/index.html
