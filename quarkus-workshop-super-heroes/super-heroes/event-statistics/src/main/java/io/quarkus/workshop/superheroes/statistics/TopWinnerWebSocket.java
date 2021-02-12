@@ -1,6 +1,9 @@
 // tag::adocWebSocket[]
 package io.quarkus.workshop.superheroes.statistics;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
 import io.smallrye.mutiny.Multi;
@@ -11,8 +14,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -25,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TopWinnerWebSocket {
 
     private static final Logger LOGGER = Logger.getLogger(TopWinnerWebSocket.class);
-    private Jsonb jsonb;
+    private ObjectWriter objectWriter;
 
     @Inject @Channel("winner-stats")
     Multi<Iterable<Score>> winners;
@@ -45,9 +46,15 @@ public class TopWinnerWebSocket {
 
     @PostConstruct
     public void subscribe() {
-        jsonb = JsonbBuilder.create();
+        objectWriter = new ObjectMapper().writer(); //.withDefaultPrettyPrinter();
         winners
-            .map(scores -> jsonb.toJson(scores))
+            .map(scores -> {
+                    try {
+                        return objectWriter.writeValueAsString(scores);
+                    } catch (JsonProcessingException jpe) {
+                        throw new Error(jpe);
+                    }
+                })
             .subscribe().with(serialized -> sessions.forEach(session -> write(session, serialized)),
                 failure -> LOGGER.error("TopWinnerWebSocket.subscribe() failed with " + failure, failure),
                 () -> LOGGER.info("Completed TopWinnerWebSocket.subscribe()"));
@@ -56,7 +63,6 @@ public class TopWinnerWebSocket {
     @PreDestroy
     public void cleanup() throws Exception {
 //        subscription.dispose();
-        jsonb.close();
     }
 
     private void write(Session session, String serialized) {
