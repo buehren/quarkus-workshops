@@ -514,6 +514,12 @@ playbook-kubernetes-knative-local.yml
 
 == TO DO
 
+TODO: App
+
+TODO: OpenID Connect
+
+TODO: Contract Tests zB mit Pact
+
 done: Profil für Google Cloud Run-Konfiguration
 
 done: Kafka
@@ -589,7 +595,7 @@ TODO: Knative Eventing (Cloud Run Eventing) nutzen statt Kafka direkt?
 
 TODO: Secrets (z.B. DB-Passwords, Kafka-Secret) sicher speichern (insb. nicht in variablen in cloud run)
 
-TODO: Google Cloud SQL über public IP verbinden und firewall-regeln dafür einrichten?
+done: Google Cloud SQL über private IP verbinden und firewall-regeln dafür einrichten?
 "This guide will help you through the fourth possibility: connecting using service account."  https://github.com/quarkusio/quarkus/pull/6634/files
 I don't think this is necessarily a blocker, as Cloud Run now has Serverless VPC access in beta. This means it's possible to connect directly to Cloud SQL via Private IP without the use of this library.
 
@@ -610,11 +616,15 @@ https://github.com/ahmetb/cloud-run-faq#can-i-use-kubectl-to-deploy-to-cloud-run
 TODO: Native Executables auch in Cloud Build bauen lassen. (Relevant für Gitops)
 HIER: https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker-build
 
+TODO: Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
+
+TODO: Use Dockerfile.fast-jar and ./mvnw package -Dquarkus.package.type=fast-jar available in later Quarkus versions?
+
+TODO: Oder selbst Container bauen und hochladen: C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\README.md
+
+
 TODO: yaml statt gcloud-Kommandozeile?
 
-TODO: Oder eigene Container bauen und hochladen: C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\README.md
-
-TODO: Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
 
 
 TODO: Dieses Wissen zentral ablegen
@@ -624,4 +634,3 @@ TODO: Reactive API für DB + alles
 
 TODO: Automate setup with Terraform or something similar (or even Vagrant?)
 
-TODO: Use Dockerfile.fast-jar and ./mvnw package -Dquarkus.package.type=fast-jar available in later Quarkus versions?
