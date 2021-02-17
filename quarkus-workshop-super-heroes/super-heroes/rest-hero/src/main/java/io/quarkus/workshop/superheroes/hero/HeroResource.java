@@ -20,7 +20,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 // end::adocOpenAPIImports[]
 // tag::adocResource[]
-import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestSseElementType;
 
