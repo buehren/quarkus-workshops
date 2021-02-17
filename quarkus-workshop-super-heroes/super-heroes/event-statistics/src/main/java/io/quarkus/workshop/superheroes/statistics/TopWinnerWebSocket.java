@@ -16,6 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
+import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.List;
@@ -71,6 +72,11 @@ public class TopWinnerWebSocket {
                 LOGGER.error("Unable to write message to web socket", result.getException());
             }
         });
+    }
+
+    @OnMessage
+    public void onMessage(Session session, String message) {
+        LOGGER.info("Received WebSocket message: "+message);
     }
 }
 // end::adocWebSocket[]
