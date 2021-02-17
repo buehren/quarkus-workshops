@@ -15,7 +15,7 @@
 
 function run
 {
-    ./mvn-all.sh "COMPILING" "compile" "$MAVEN_EXTRA_ARGS"
+    ./mvn-all.sh "COMPILING" "compile" "$MAVEN_EXTRA_ARGS"  || return
 
     source superhero-services-env.sh || return
 
