@@ -16,9 +16,10 @@ class MyApp extends StatelessWidget {
       title: title,
       home: MyHomePage(
         title: title,
-        //channel: WebSocketChannel.connect(Uri.parse(
+        //channel: WebSocketChannel.connect(Uri.parse('wss://echo.websocket.org')),
         webSocketUrl:
-            'ws://192.168.42.12:8085/stats/winners', // wss://echo.websocket.org')),
+            //'ws://192.168.42.12:8085/stats/winners',
+            'wss://event-statistics-vsv4xsncya-ey.a.run.app/stats/winners',
       ),
       theme: ThemeData(
         // This is the theme of your application.
@@ -70,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       await Future.delayed(Duration(seconds: 4));
     }
     setState(() {
-      print(new DateTime.now().toString() + " Starting connection attempt...");
+      print(new DateTime.now().toString() + " Starting connection attempt to "+ widget.webSocketUrl +" ...");
       _channel = WebSocketChannel.connect(Uri.parse(widget.webSocketUrl));
       print(new DateTime.now().toString() + " Connection attempt completed.");
     });
