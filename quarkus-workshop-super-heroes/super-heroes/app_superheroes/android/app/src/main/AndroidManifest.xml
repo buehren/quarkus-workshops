@@ -2,6 +2,7 @@
     package="com.example.app_superheroes">
    <application
         android:label="app_superheroes"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
