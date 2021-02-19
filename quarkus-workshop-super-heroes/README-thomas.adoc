@@ -116,6 +116,26 @@ ccloud kafka topic create fights
 vi ~/.kafka-api-key
 ----
 
+===== User authentication
+
+https://cloud.google.com/run/docs/tutorials/identity-platform
+
+
+https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity?project=_
+
+https://console.cloud.google.com/apis/credentials?project=_
+Download OAuth 2.0 Client ID "Web client (auto created by Google Service)"
+
+[source%nowrap,bash]
+----
+gcloud services enable \
+    run.googleapis.com \
+    secretmanager.googleapis.com \
+    cloudbuild.googleapis.com \
+    containerregistry.googleapis.com
+----
+
+#sql-component.googleapis.com \
 
 ===== Google Cloud SQL
 
