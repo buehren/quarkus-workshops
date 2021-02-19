@@ -42,7 +42,7 @@ class MyHomePage extends StatefulWidget {
   final String webSocketUrl;
   //final WebSocketChannel channel;
 
-  MyHomePage({Key key, @required this.title, @required this.webSocketUrl})
+  MyHomePage({Key? key, required this.title, required this.webSocketUrl})
       : super(key: key);
 
   @override
@@ -52,7 +52,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController _controller = TextEditingController();
   StreamController<String> _streamController = StreamController<String>();
-  WebSocketChannel _channel;
+  late WebSocketChannel _channel;
+  bool _wasConnected = false;
 
   @override
   void initState() {
@@ -66,13 +67,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _connect() async {
-    if (_channel != null) {
+    if (_wasConnected) {
       // add in a reconnect delay
       await Future.delayed(Duration(seconds: 4));
     }
     setState(() {
-      print(new DateTime.now().toString() + " Starting connection attempt to "+ widget.webSocketUrl +" ...");
+      print(new DateTime.now().toString() +
+          " Starting connection attempt to " +
+          widget.webSocketUrl +
+          " ...");
       _channel = WebSocketChannel.connect(Uri.parse(widget.webSocketUrl));
+      _wasConnected = true;
       print(new DateTime.now().toString() + " Connection attempt completed.");
     });
     _channel.stream.listen((data) => _streamController.add(data),
@@ -101,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
               stream: _streamController.stream,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  List winnerScores = jsonDecode(snapshot.data);
+                  List winnerScores = jsonDecode(snapshot.data.toString());
 
                   return ListView.builder(
                     shrinkWrap: true,
