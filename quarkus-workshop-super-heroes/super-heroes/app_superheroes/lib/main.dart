@@ -108,19 +108,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (snapshot.hasData) {
                   List winnerScores = jsonDecode(snapshot.data.toString());
 
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: winnerScores.length,
-                    itemBuilder: (context, index) {
-                      var winnerScore =
-                          WinnerScore.fromJson(winnerScores[index]);
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: winnerScores.length,
+                      itemBuilder: (context, index) {
+                        var winnerScore =
+                            WinnerScore.fromJson(winnerScores[index]);
 
-                      return ListTile(
-                        leading: Icon(Icons.wine_bar),
-                        title: Text(winnerScore.name),
-                        trailing: Text(winnerScore.score.toString()),
-                      );
-                    },
+                        return ListTile(
+                          leading: Icon(Icons.wine_bar),
+                          title: Text(winnerScore.name),
+                          trailing: Text(winnerScore.score.toString()),
+                        );
+                      },
+                    )
                   );
                 } else {
                   return Padding(
