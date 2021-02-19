@@ -76,6 +76,12 @@ export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=""
 ./stop-docker-all.sh
 ----
 
+==== Print Kafka messages
+
+----
+./kafkacat.sh
+----
+
 === Google Cloud Run (like Knative)
 
 * Guides:
