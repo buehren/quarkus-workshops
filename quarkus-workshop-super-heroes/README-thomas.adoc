@@ -561,11 +561,23 @@ flutter run -d UBV7N18A12345678  # use listed device name
 
 == TO DO
 
-TODO: App
+done: App
 
-TODO: OpenID Connect
+TODO: App an Cloud Events / Kafka anbinden:
+    1. Daten je nach Kunde!
+    2. ohne eigenes Websocket?
+
+TODO: Native Build in Cloud
+
+TODO: User Auth (OpenID Connect?)
 
 TODO: Contract Tests zB mit Pact
+
+TODO: https://cloud.google.com/run/docs/authenticating/service-to-service
+
+TODO: iOS-App bauen
+
+
 
 done: Profil für Google Cloud Run-Konfiguration
 
