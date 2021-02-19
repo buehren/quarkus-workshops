@@ -28,6 +28,7 @@ public class TopWinnerWebSocket {
 
     private static final Logger LOGGER = Logger.getLogger(TopWinnerWebSocket.class);
     private ObjectWriter objectWriter;
+    private String lastPublishedJson;
 
     @Inject @Channel("winner-stats")
     Multi<Iterable<Score>> winners;
@@ -38,6 +39,9 @@ public class TopWinnerWebSocket {
     @OnOpen
     public void onOpen(Session session) {
         sessions.add(session);
+        if (lastPublishedJson!=null) {
+            write(session, lastPublishedJson);
+        }
     }
 
     @OnClose
@@ -56,7 +60,10 @@ public class TopWinnerWebSocket {
                         throw new Error(jpe);
                     }
                 })
-            .subscribe().with(serialized -> sessions.forEach(session -> write(session, serialized)),
+            .subscribe().with(serialized -> {
+                    lastPublishedJson = serialized;
+                    sessions.forEach(session -> write(session, serialized));
+                },
                 failure -> LOGGER.error("TopWinnerWebSocket.subscribe() failed with " + failure, failure),
                 () -> LOGGER.info("Completed TopWinnerWebSocket.subscribe()"));
     }
