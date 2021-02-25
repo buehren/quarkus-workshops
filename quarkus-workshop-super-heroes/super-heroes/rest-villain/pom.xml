@@ -147,7 +147,7 @@
             <id>googlecloud</id>
             <activation>
                 <property>
-                    <name>${env.QUARKUS_PROFILE}</name>
+                    <name>QUARKUS_PROFILE</name>
                     <value>googlecloud</value>
                 </property>
             </activation>
