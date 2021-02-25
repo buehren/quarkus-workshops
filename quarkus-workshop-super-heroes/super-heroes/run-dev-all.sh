@@ -23,7 +23,9 @@ function run
         echo "======================================= START DEV MODE: $service ======================================= " && \
         echo "Starting $service quarkus:dev in background"
         cd $service  || return 1
-        mvn quarkus:dev -Ddebug=false &>> /tmp/$service.dev.out &
+        # debugHost=0.0.0.0: Listen to all IP addresses when debugging
+        # (helpful for running in VM - just as an example for manual calls; debugging is disabled here anyway)
+        mvn quarkus:dev -DdebugHost=0.0.0.0 -Ddebug=false &>> /tmp/$service.dev.out &
         cd ..  || return 1
     done
 
