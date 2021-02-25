@@ -5,5 +5,4 @@
 /src/*
 !/src/main/docker/
 /target/*
-!/target/*-runner.jar
-!/target/lib/**
+!/target/quarkus-app/**

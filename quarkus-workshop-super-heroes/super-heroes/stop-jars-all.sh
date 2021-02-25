@@ -8,16 +8,16 @@ function run
     source superhero-services-env.sh || return
 
     for service in $SUPERHERO_SERVICES ui-super-heroes; do
-        pgrep -af "java .*-jar $service/target/$service-01-runner\.jar"
+        pgrep -af "java .*-jar $service/target/quarkus-app/quarkus-run\.jar"
         if [ "$?" == "0" ]; then
             echo "======================================= KILL JAR: $service ======================================= " && \
-            pkill -ef "java .*-jar $service/target/$service-01-runner\.jar" || return
+            pkill -ef "java .*-jar $service/target/quarkus-app/quarkus-run\.jar" || return
         fi
     done
 
     sleep 2
     echo "Services still running:"
-    pgrep -af "target/.*-01-runner.*"
+    pgrep -af "target/.*\.jar.*"
 
     return 0
 }

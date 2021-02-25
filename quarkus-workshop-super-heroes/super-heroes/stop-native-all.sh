@@ -25,7 +25,7 @@ function run
 
     sleep 2
     echo "Services still running:"
-    pgrep -af "target/.*-01-runner.*"
+    pgrep -af "target/.*-runner.*"
 
     return 0
 }
