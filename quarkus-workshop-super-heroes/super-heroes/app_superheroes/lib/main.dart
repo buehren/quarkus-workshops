@@ -187,4 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _channel?.sink.close();
     super.dispose();
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<WebSocketChannel>('_channel', _channel));
+  }
 }
