@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
@@ -5,6 +6,7 @@ import 'package:app_superheroes/winner_score.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 
 void main() => runApp(MyApp());
 
@@ -52,22 +54,33 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController _controller = TextEditingController();
   StreamController<String> _streamController = StreamController<String>();
-  late WebSocketChannel _channel;
-  bool _wasConnected = false;
+  WebSocketChannel? _channel;
+  bool _hasStartedConnect = false;
+  bool _isChannelOpen = false;
 
   @override
   void initState() {
     super.initState();
+    _isChannelOpen = false;
     _connect();
   }
 
   _wserror(err) async {
+    setState(() {
+      _isChannelOpen = false;
+    });
+
     print(new DateTime.now().toString() + " Connection error: $err");
     await _connect();
   }
 
   _connect() async {
-    if (_wasConnected) {
+
+    setState(() {
+      _isChannelOpen = false;
+    });
+
+    if (_hasStartedConnect) {
       // add in a reconnect delay
       await Future.delayed(Duration(seconds: 4));
     }
@@ -76,12 +89,30 @@ class _MyHomePageState extends State<MyHomePage> {
           " Starting connection attempt to " +
           widget.webSocketUrl +
           " ...");
+
       _channel = WebSocketChannel.connect(Uri.parse(widget.webSocketUrl));
-      _wasConnected = true;
-      print(new DateTime.now().toString() + " Connection attempt completed.");
+
+      /* Does not (yet) work in Web mode: "Error: Unsupported operation: Platform._version"
+      WebSocket.connect(widget.webSocketUrl).then((ws) {
+        _channel = IOWebSocketChannel(ws);
+
+        print(new DateTime.now().toString() + " Connection established.");
+      });
+      */
+
+      _hasStartedConnect = true;
     });
-    _channel.stream.listen((data) => _streamController.add(data),
-        onDone: _connect, onError: _wserror, cancelOnError: true);
+    _channel?.stream.listen(
+        (data) {
+            print("Received data: $data");
+            setState(() {
+              _isChannelOpen = true;
+            });
+            _streamController.add(data);
+        },
+        onDone: _connect,
+        onError: _wserror,
+        cancelOnError: true);
   }
 
   @override
@@ -97,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Form(
               child: TextFormField(
+                enabled: _isChannelOpen,
                 controller: _controller,
                 decoration:
                     InputDecoration(labelText: 'Schicke eine Nachricht!'),
@@ -135,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _sendMessage,
+        onPressed: _isChannelOpen ? _sendMessage : null,
         tooltip: 'Abschicken',
         child: Icon(Icons.send),
       ), // This trailing comma makes auto-formatting nicer for build methods.
