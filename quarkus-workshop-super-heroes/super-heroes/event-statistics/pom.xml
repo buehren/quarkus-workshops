@@ -102,7 +102,23 @@
                     <value>googlecloud</value>
                 </property>
             </activation>
-            <!-- nothing required for this profile here - but necessary because of parameter in build/deploy scripts -->
+            <dependencies>
+                <!--
+                    Required for Reactive PostgreSQL client using Unix Socket
+                    or Blocking (conventional) PostgreSQL client using Google's Java library with SocketFactory
+
+                <dependency>
+                    <!- - https://github.com/quarkusio/quarkus/issues/6327 - ->
+                    <groupId>jakarta.security.jacc</groupId>
+                    <artifactId>jakarta.security.jacc-api</artifactId>
+                </dependency>
+                <dependency>
+                    <!- - https://github.com/quarkusio/quarkus/issues/6327 - ->
+                    <groupId>net.java.dev.jna</groupId>
+                    <artifactId>jna</artifactId>
+                </dependency>
+                -->
+            </dependencies>
         </profile>
         <profile>
             <id>native</id>

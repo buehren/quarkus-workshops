@@ -197,6 +197,10 @@
                 </property>
             </activation>
             <dependencies>
+                <!--
+                    Required for Reactive PostgreSQL client using Unix Socket
+                    or Blocking (conventional) PostgreSQL client using Google's Java library with SocketFactory
+
                 <dependency>
                     <!- - https://github.com/quarkusio/quarkus/issues/6327 - ->
                     <groupId>jakarta.security.jacc</groupId>
@@ -207,6 +211,7 @@
                     <groupId>net.java.dev.jna</groupId>
                     <artifactId>jna</artifactId>
                 </dependency>
+                -->
             </dependencies>
         </profile>
         <profile>
