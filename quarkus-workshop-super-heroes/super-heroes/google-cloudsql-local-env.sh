@@ -7,8 +7,23 @@ function run
     source google-cloudsql-env.sh || return
     source kafka-env.sh || return
 
-    # Stop service if it was installed and started
-    sudo systemctl stop cloud-sql-proxy
+
+    # Change environment variables SERVICE_*_DATASOURCE_INSTANCE_IP to 127.0.0.1
+    for service in $SUPERHERO_SERVICES_ALL; do
+
+        # Service name used in environment variables (upcase and "_"   instead of "-")
+        SERVICE=${service^^}
+        SERVICE=${SERVICE//-/_}
+
+        var_datasource_instance_ip=SERVICE_${SERVICE}_DATASOURCE_INSTANCE_IP
+
+        export "${var_datasource_instance_ip}"=127.0.0.1
+        env | grep "${var_datasource_instance_ip}"
+    done
+
+
+    # Stop cloud-sql-proxy if it was started as service (we start it manually)
+    sudo systemctl stop cloud-sql-proxy || return
 
     # Stop previous instance
     pgrep -af "cloud-sql-proxy"
