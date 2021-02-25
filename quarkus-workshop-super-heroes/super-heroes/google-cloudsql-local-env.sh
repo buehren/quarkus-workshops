@@ -20,7 +20,7 @@ function run
     echo "======================================= START: cloud-sql-proxy ======================================= " && \
     echo "Starting cloud-sql-proxy in background"
     # TCP Port:
-    cloud-sql-proxy -instances=$SERVICE_REST_HERO_DATASOURCE_INSTANCE_CONNECTION_NAME=tcp:5432 &>> /tmp/cloud-sql-proxy.out &
+    cloud-sql-proxy -ip_address_types=PUBLIC -instances="$SERVICE_REST_HERO_DATASOURCE_INSTANCE_CONNECTION_NAME"=tcp:5432 &>> /tmp/cloud-sql-proxy.out &
     # Unix Socket:
     #sudo mkdir -pv /cloudsql
     #sudo chown $USER /cloudsql

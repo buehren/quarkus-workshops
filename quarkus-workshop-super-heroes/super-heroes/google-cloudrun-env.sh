@@ -61,8 +61,9 @@ function run
     [ "$GCLOUD_DB_CONNECTION_NAME" ] || return 1
     export GCLOUD_DB_CONNECTION_NAME
 
-    # GCLOUD_DB_INSTANCE_IP
-    GCLOUD_DB_INSTANCE_IP=$(gcloud sql instances describe "$GCLOUD_DB_INSTANCE" --format 'value(ipAddresses.ipAddress)') || return 1
+    # GCLOUD_DB_INSTANCE_IP (private IP address)
+    GCLOUD_DB_INSTANCE_IP=$(gcloud sql instances describe "$GCLOUD_DB_INSTANCE" --format json | \
+        jq --raw-output '.ipAddresses | .[] | select(.type == "PRIVATE") | .ipAddress') || return 1
     echo "GCLOUD_DB_INSTANCE_IP=$GCLOUD_DB_INSTANCE_IP"
     [ "$GCLOUD_DB_CONNECTION_NAME" ] || return 1
     export GCLOUD_DB_INSTANCE_IP

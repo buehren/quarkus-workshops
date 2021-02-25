@@ -139,11 +139,11 @@ gcloud services enable \
 
 ===== Google Cloud SQL
 
-* Deploy Google Cloud Resources:
-+
+====== Deploy Google Cloud SQL Resources
+
 IMPORTANT: The Google Cloud SQL instance costs! +
 When no longer needed: <<delete-cloud-sql-instance>> and <<delete-cloud-project>>
-+
+
 [source%nowrap,bash]
 ----
 cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
@@ -158,9 +158,13 @@ gcloud projects add-iam-policy-binding $GCLOUD_PROJECT_ID \
   --role roles/cloudsql.client
 
 # Create PostgreSQL database instance:
-# TODO: Prepare private IP address before this (currently below) and assign it here already:
-#       --network=default \
-#       --no-assign-ip \
+TODO: Prepare private IP address before this (currently below) and assign it here already:
+  --network=default \
+  --assign-ip \
+# To disable the public IP address of the database instance,
+# replace assign-ip with no-assign-ip
+# (this disables external/local access with cloud-sql-proxy):
+#  --no-assign-ip \
 gcloud sql instances create my-database \
   --tier=db-f1-micro \
   --region=$GCLOUD_REGION \
@@ -217,7 +221,11 @@ gcloud services vpc-peerings connect \
 
 gcloud beta sql instances patch $GCLOUD_DB_INSTANCE \
   --network=default \
-  --no-assign-ip
+  --assign-ip
+# To disable the public IP address of the database instance,
+# replace assign-ip with no-assign-ip
+# (this disables external/local access with cloud-sql-proxy):
+#  --no-assign-ip
 
 gcloud compute networks vpc-access connectors create my-vpc-connector \
   --network default \
@@ -228,7 +236,9 @@ gcloud compute networks vpc-access connectors describe my-vpc-connector \
 
 ----
 
-* Install Google Cloud SQL Proxy for accessing the database from the local host:
+====== Google Cloud SQL Proxy
+
+Install Google Cloud SQL Proxy for accessing the database from the local host:
 
 ** You must specify the Google Cloud SQL Connection Name on the following command line.
 It is displayed as `GCLOUD_DB_CONNECTION_NAME` when running `source google-cloudrun-env.sh`.
@@ -246,25 +256,62 @@ ansible-playbook \
   --extra-vars "GCLOUD_DB_CONNECTION_NAME=..."
 ----
 
-===== Google Cloud SQL database connection background [[google-cloud-sql-background]]
+** Start Google Cloud SQL Proxy:
++
+[source%nowrap,bash]
+----
+cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
+
+source google-cloudsql-local-env.sh
+----
+
+** Connect to Google Cloud SQL instance:
++
+[source%nowrap,bash]
+----
+psql -h localhost -U superman -d heroes_database
+----
+
+** Stop Google Cloud SQL proxy:
++
+[source%nowrap,bash]
+----
+sudo service cloud-sql-proxy stop
+TODO:
+pkill cloud-sql-proxy
+?
+----
+
+
+====== Google Cloud SQL database connection options [[google-cloud-sql-options]]
 
 Google Cloud SQL can be connected in different ways:
 
-* Public IP address - not very secure, although you can define the allowed IP addresses.
+TCP port at public IP address:: Seems not very secure, but you can define the allowed IP addresses.
 
-* Private IP address - requires a Google VPC setup that costs (and can it be accessed from outside?).
+TCP port at private IP address:: Requires a Google VPC setup that costs (and cannot be accessed from outside - but Public IP address can be enabled at the same time). +
+-> *This option is currently used in this project.*
 
-* By service account - requires a specialized PostgreSQL SocketFactory from Google.
-** We use this option in this project. The Maven and Quarkus profiles `googlecloud` include the dependency
-when building (`pom.xlm`) and activate the required configuration at runtime (`application.properties`).
-** But Google's SocketFactory is not (yet?) compatible with native executables created by GraalVM
+TCP port of cloud-sql-proxy:: Can be used locally or in Google Cloud Run (if cloud-sql-proxy is started in container).
+* cloud-sql-proxy itself must be able to access Google Cloud SQL (needs public IP address or connection to VPC).
+
+Unix Socket of cloud-sql-proxy:: Can be used locally (if cloud-sql-proxy is started) or in Google Cloud Run (without starting cloud-sql-proxy).
+* Unfortunately using a Unix socket is not -yet- compatible with the Reactive PostgreSQL client in native executables.
+* The "regular" PostgreSQL client can (or must?) use Google's Java library with a dedicated SocketFactory.
+** But Google's SocketFactory is not compatible with native executables created by GraalVM out of the box
 because the library uses reflection a lot -- which cannot be analyzed statically.
-** Therefore, we use the GraalVM native image tracing agent for dynamic analysis
-while running the service in JVM mode. This was already done, and the resulting configuration
-is enabled in this project. +
+** Therefore, we must use the GraalVM native image tracing agent for dynamic analysis
+while running the service in JVM mode.
+** This was already done (but the resulting configuration is commented-out as it is currently not used). +
 -> In <<native-image-agent>> we will see how that works.
 
-===== Populate Google Cloud SQL database from localhost
+'''
+
+* The `rest-hero` microservice contains configurations for all options (inactive ones are commented-out) in link:super-heroes/rest-hero/src/main/resources/application.properties[src/main/resources/application.properties] and link:super-heroes/rest-hero/pom.xml[pom.xml]
+
+** The options for running in Google Cloud are activated by the Maven and Quarkus profiles `googlecloud`.
+
+====== Populate Google Cloud SQL database from localhost
 
 1. Set environment, start Google Cloud SQL Proxy:
 +
@@ -275,24 +322,11 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 source google-cloudsql-local-env.sh
 ----
 
-2. (Re-)Create database tables and insert content from `import.sql` into the Google Cloud SQL Database using Quarkus DEV mode.
-+
-IMPORTANT: The following code starts each service in dev-mode to delete and (re-)create
-the tables and insert data into the Google Cloud SQL database. +
- +
-Press CTRL+C (once) for each service after they have started and finished the inserts.
+2. Create database tables and insert content from `import.sql` into the Google Cloud SQL Database:
 +
 [source%nowrap,bash]
 ----
-for service in $SUPERHERO_SERVICES; do
-  cd $service && \
-  mvn clean quarkus:dev \
-      -Pgooglecloud \
-      -Dquarkus.profile=googlecloud \
-      -Dquarkus.hibernate-orm.database.generation=drop-and-create \
-      -Ddebug=false
-  cd ..
-done
+./prepare-db-all.sh
 ----
 
 3. Stop Google Cloud SQL proxy:
@@ -302,7 +336,42 @@ done
 sudo service cloud-sql-proxy stop
 ----
 
+
+---
+
+`quarkus.hibernate-orm.database.generation=drop-and-create` does not (yet) work with `quarkus-reactive-pg-client`:
+
+[.line-through]#2. (Re-)Create database tables and insert content from `import.sql` into the Google Cloud SQL Database using Quarkus DEV mode.#
+
+IMPORTANT: [.line-through]#The following code starts each service in dev-mode to delete and (re-)create
+the tables and insert data into the Google Cloud SQL database.# +
+{empty} +
+[.line-through]#Press CTRL+C (once) for each service after they have started and finished the inserts.#
+
+[%hardbreaks]
+[.line-through]#for service in $SUPERHERO_SERVICES; do
+
+    # Service name used in environment variables (upcase and "_"   instead of "-")
+    SERVICE=${service^^}
+    SERVICE=${SERVICE//-/_}
+
+    var_datasource_instance_ip=SERVICE_${SERVICE}_DATASOURCE_INSTANCE_IP
+
+    cd $service && \
+    ${!var_datasource_connection_name}=127.0.0.1 \
+        mvn quarkus:dev \
+            -Pgooglecloud \
+            -Dquarkus.profile=googlecloud \
+            -Dquarkus.hibernate-orm.database.generation=drop-and-create \
+            -Ddebug=false
+    cd ..
+done#
+
 ==== Run on localhost with access to Google Cloud SQL database and Kafka in Confluent Cloud [[run-local-with-cloud-db]]
+
+IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
+{empty} +
+After that restart it to continue syncing changes from the host to the VM.
 
 1. Set environment, start Google Cloud SQL Proxy:
 +
@@ -375,7 +444,7 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 
 #TODO#
 
-As described in <<google-cloud-sql-background>> ....
+As described in <<google-cloud-sql-options>> ....
 
 
 * https://github.com/oracle/graal/blob/master/substratevm/Reflection.md
