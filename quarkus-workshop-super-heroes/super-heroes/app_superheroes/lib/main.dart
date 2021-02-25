@@ -156,9 +156,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                   );
                 } else {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 60.0),
-                    child: Text('Waiting for winners...'),
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 60.0),
+                      child: Text('Waiting for winners...'),
+                    )
                   );
                 }
               },
