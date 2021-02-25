@@ -10,7 +10,7 @@ the Quarkus VM
 
 (The links reference my `https://github.com/buehren/learn/blob/master/jvm/quarkus/README.adoc[learn.git/jvm/quarkus/README.adoc]`)
 
-=== Additional setup
+=== Additional setup [[vm-additional-setup]]
 
 * Run the following playbook as described in xref:../../README.adoc#run-playbook[Configure the VM with Ansible] but replace the call of `ansible-playbook` with the following:
 +
@@ -18,14 +18,17 @@ the Quarkus VM
 ----
 # In the Ansible-Controller VM:
 
+DIR=quarkus/quarkus-workshops/quarkus-workshop-super-heroes/ansible && \
+mkdir -pv ~/prj/$DIR && \
+rsync -prv vagrant@192.168.42.12:~/$DIR/* ~/prj/$DIR/ && \
 cd ~/prj/quarkus/ansible && \
-ansible-playbook ~/prj/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/ansible/playbook.yml
+ansible-playbook ~/prj/$DIR/provision.yml
 ----
 
 === Local build & run (DEV mode, JVM, Native, Docker)
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
- +
+{empty} +
 After that restart it to continue syncing changes from the host to the VM.
 
 * In the Quarkus VM:
@@ -334,6 +337,9 @@ source google-cloudsql-local-env.sh
 [source%nowrap,bash]
 ----
 sudo service cloud-sql-proxy stop
+TODO:
+pkill cloud-sql-proxy
+?
 ----
 
 
@@ -390,10 +396,18 @@ needs to be analyzed dynamically.
 +
 [source%nowrap,bash]
 ----
+./stop-dev-all.sh
 ./stop-jars-all.sh
 ./stop-native-all.sh
 
 ./build-ui.sh
+
+
+# To run in Quarkus DEV mode:
+
+./google-cloudrun-run-dev-local-all.sh
+# now try the services
+./stop-dev-all.sh
 
 
 # To build JARs and run in JVMs:
@@ -415,12 +429,15 @@ needs to be analyzed dynamically.
 [source%nowrap,bash]
 ----
 sudo service cloud-sql-proxy stop
+TODO:
+pkill cloud-sql-proxy
+?
 ----
 
 ==== Build and deploy JARs to Google Cloud Run
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
- +
+{empty} +
 After that restart it to continue syncing changes from the host to the VM.
 
 [source%nowrap,bash]
@@ -537,6 +554,9 @@ export JAVA_EXTRA_ARGS=""
 ./stop-native-all.sh
 
 sudo service cloud-sql-proxy stop
+TODO:
+pkill cloud-sql-proxy
+?
 ----
 
 _(Maybe it would be possible to run all services at the same time with the agent enabled,
@@ -548,7 +568,7 @@ but maybe that would damage the files written to the config merge directory)._
 ==== Build and deploy native executables to Google Cloud Run
 
 IMPORTANT: STOP `vagrant rsync-auto` while builds are running to avoid deletion of files when changing anything on the host! +
- +
+{empty} +
 After that restart it to continue syncing changes from the host to the VM.
 
 [source%nowrap,bash]
@@ -571,6 +591,10 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 ==== Send requests
 
 #TODO#
+
+ curltime -i https://rest-hero-vsv4xsncya-ey.a.run.app/api/heroes/random
+
+ wsdump.py ws://localhost:8085/stats/winners
 
 
 time curl $SERVICE_REST_HERO_URL/api/heroes/random
@@ -609,19 +633,88 @@ playbook-kubernetes-knative-local.yml
 
 == App (Flutter)
 
-https://flutter.dev/docs/get-started/install[Install Flutter]
+=== Setup
+
+TODO
+
+https://flutter.dev/docs/get-started/install[Install Flutter] (it is automatically installed in the <<vm-additional-setup,VM>>)
+
+va
+In X-Windows nötig? sudo -u $USER bash
+
 
 [source%nowrap,bash]
 ----
 cd super-heroes/app_superheroes
 
-# Check Flutter requirements
-flutter doctor
-
 # Switch to Beta Channel (currently required for Web target)
 flutter channel beta
 flutter upgrade
-flutter pub get
+flutter config --enable-web
+
+# Check Flutter requirements
+flutter doctor
+----
+
+
+GUI einschalten:
+VBoxManage startvm quarkus --type separate
+oder VirtualBox: Zeigen
+vagrant / vagrant
+startx
+
+VirtualBox-Menüs anzeigen / verstecken: HOST+C (Standard: HOST=Strg)
+
+GUI abschalten:
+VBoxManage startvm quarkus --type headless
+
+
+port forwarding --> Vagrantfile!
+plink -L 9100:localhost:9100 -L 9099:localhost:9099 -L 8089:localhost:8089 vagrant@192.168.42.12
+
+
+emulator -accel-check
+emulator -avd my_device
+
+https://developer.android.com/studio/run/emulator-acceleration
+
+flutter emulators --launch my_device
+
+flutter emulators
+flutter emulators --create
+flutter emulators
+flutter emulators --launch flutter_emulator
+
+
+avdmanager -v list avd
+avdmanager -v list target
+
+sdkmanager --list_installed
+
+emulator -avd flutter_emulator
+
+
+=== Run App in Web Browser and Android Emulator
+
+TODO
+
+[source%nowrap,bash]
+----
+cd super-heroes/app_superheroes
+
+# Clean project
+flutter clean
+
+#
+flutter run -d web-server --web-port 8089 --observatory-port 9099 --web-hostname 0.0.0.0
+http://127.0.0.1:8089/
+http://192.168.42.12:8089/
+DEBUG PORT??
+http://192.168.42.12:9099/AUTH_CODE=/
+?? start chrome --remote-debugging-port=9222
+
+
+
 
 # Build and run/debug app in Web browser
 flutter build web
@@ -631,34 +724,206 @@ flutter run -d chrome
 flutter build apk
 # Start Emulator in Android Studio -> Android Virtual Device Manager
 flutter devices
-flutter run -d emulator-5554 # use listed device name
+flutter run --observatory-port 9099 -d emulator-5554 # use listed device name
 
-# Build iOS App
+# TODO: Build iOS App
 flutter build ipa # MacOS only
 ----
 
+h = help (z.B. hot reload r, hot restart R, umschalten zwischen iOS und Android mit o, Devtools mit v, )
+
+IntelliJ Dart Remote Debug
+9099
+
 === Run/Debug App on attached Android Device
+
+TODO
 
 * Enable Developer options and USB debugging on your device. Detailed instructions are available in the https://developer.android.com/studio/debug/dev-options.html[Android documentation].
 * Using a USB cable, plug your phone into your computer. If prompted on your device, authorize your computer to access your device.
 
+You must install the Extension Pack in order to get USB2(EHCI) and USB3(xHCI) functionality.
+
+That's the Extension Pack - installed on the host. Not the Guest Additions.
+
+Als Administrator
+
+From the File menu, select Preferences. In the window that displays, go to the Extensions category. This shows you the extensions which are currently installed, and enables you to remove a package or add a new package.
+
+
+https://developer.android.com/studio/command-line/adb
+
+* TODO: VirtualBox: in USB-Einstellungen USB 3.0 aktivieren und Smartphone anklicken, um es mit der VM zu verbinden
+
+VBoxManage list usbhost
+VBoxManage controlvm quarkus usbdetach <UUID>
+VBoxManage controlvm quarkus usbattach <UUID>
+
+
+Auf "Dateien übertragen" umschalten
+
+adb devices
+
+
+lsusb
+usb-devices
+
+adb kill-server
+adb start-server
+
+
+Gerät kann nicht auf den Host zugreifen
+adb -s UBV7N18A24001184 reverse tcp:8085 tcp:8085
+adb -s 192.168.1.76:5555 reverse tcp:8085 tcp:8085
+Und in der App localhost:8085 in URLs verwenden
+
+
+Verbindung per WLAN
+
+Hat nicht geklappt (noch nicht weiter untersucht, evtl. auch nicht nötig)
+
+IP-Adresse ermitteln
+adb -s UBV7N18A24001184 shell ip route
+TCP/IP-Verbindung auf dem Device aktivieren (muss an USB angeschlossen sein):
+adb -s UBV7N18A24001184 tcpip 5555
+Jetzt das USB-Kabel trennen.
+Dann über das Netzwerk verbinden:
+adb connect 192.168.1.76
+
+
+
+In X-Windows nötig? sudo -u $USER bash
+
+
 [source%nowrap,bash]
 ----
 flutter devices                  # connected Android device should be listed
-flutter run -d UBV7N18A12345678  # use listed device name
+flutter run --observatory-port 9099 -d UBV7N18A12345678  # use listed device name
+
+flutter run --observatory-port 9099 -d 192.168.1.76:5555
+
 ----
 
-== TO DO
+h = help (z.B. umschalten zwischen iOS und Android mit o)
+
+
+
+Flutter DevTools, a Flutter debugger and profiler, on EML L29 is available at: http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A9099%2FWZp1efqqrTA%3D%2F
+
+
+plink -L 9100:localhost:9100 vagrant@192.168.42.12
+
+
+An Observatory debugger and profiler on EML L29 is available at: http://127.0.0.1:9099/WZp1efqqrTA=/
+
+plink -L 9099:localhost:9099 vagrant@192.168.42.12
+
+
+== Backlog
+
 
 done: App
+
+TODO: User Auth (OpenID Connect?)
+Sign out
+
+TODO: Überall 192.168.42.12.xip.io etc. benutzen wg. User Auth (und in Anleitung: bei Google freischalten)
+
+
+TODO: USB unzuverlässig? Über WLAN versuchen?
+
+TODO: HTTP-Verbindung vom Android-Device zu Services auf Localhost wie? Chrome Devices oder SSH-Tunnel manuell?
+
+TODO: ld hat Probleme mit NFS... Bei native build sporadisch
+
+* `:share_current_dir_nfs_mount_options => %w{rw,async,fsc,nolock,rsize=32768,wsize=32768,hard,noatime,actimeo=2},` +
+Probleme:
+** ld meldet IO-Fehler
+** irgendwann hängen Zugriffe auf gemountetes Verzeichnis
+* cachefilesd hat nicht geholfen
+* `:share_current_dir_nfs_mount_options => %w{rw,sync,noac,nolock,hard},` +
+** extrem langsam beim build (fast 2 stunden für ./build-native-all.sh && ./run-native-all.sh)
+** build hat funktioniert (nur 1x probiert), aber danach hing wieder der Zugriff auf das Verzeichnis
+
+
+TODO: Recherche: Flutter in Apple App Store unproblematisch?
+
+TODO: Flutter iOS und Android in einer App wie?
 
 TODO: App an Cloud Events / Kafka anbinden:
     1. Daten je nach Kunde!
     2. ohne eigenes Websocket?
 
-TODO: Native Build in Cloud
+TODO: Funktioniert Flutter in VM mit Android-Handy an USB + Emulator? Dann per Ansible in VM installieren.
+----
+> flutter run -d chrome --release --web-hostname localhost --web-port 7357
+No devices found with name or id matching 'chrome'
 
-TODO: User Auth (OpenID Connect?)
+> export CHROME_EXECUTABLE=/tmp/chrome
+
+> cat /tmp/chrome
+echo $* >> /tmp/chrome-parameters.txt
+
+> flutter run -d chrome
+Launching lib/main.dart on Chrome in debug mode...
+Waiting for connection from debug service on Chrome...
+
+> cat /tmp/chrome-parameters.txt
+--version
+--user-data-dir=/tmp/flutter_tools.SRWVED/flutter_tools_chrome_device.WUFKUW --remote-debugging-port=43043 --disable-background-timer-throttling --disable-extensions --disable-popup-blocking --bwsi --no-first-run --no-default-browser-check --disable-default-apps --disable-translate http://localhost:34965
+----
+
+TODO: Emulator crasht. Noch mal mit neuester KVM-Version probieren
+
+(auch schon alt, evtl. selbst compilieren) https://launchpad.net/~jacob/+archive/ubuntu/virtualisation?field.series_filter=bionic
+
+https://mathiashueber.com/manually-update-qemu-on-ubuntu-18-04/
+
+Ubuntu-Update?
+
+https://wiki.qemu.org/ChangeLog
+https://www.linux-kvm.org/page/ChangeLog
+
+#https://wiki.ubuntuusers.de/KVM/# +
+https://help.ubuntu.com/community/KVM/Installation
+
+https://galaxy.ansible.com/mrlesmithjr/kvm
+
+
+egrep -c '(vmx|svm)' /proc/cpuinfo
+muss größer 0 sein
+
+kvm-ok
+
+sudo apt update
+sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+
+kvm --version
+/usr/bin/qemu-system-x86_64 --version
+
+sudo adduser ‘username’ libvirt
+
+lsmod | grep kvm
+
+virsh list --all
+
+sudo systemctl status libvirtd
+sudo systemctl enable --now libvirtd
+
+> kvm
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.80000001H:ECX.svm [bit 2]
+Could not initialize SDL(No available video device) - exiting
+
+vagrant@quarkus:~/
+> kvm --version
+QEMU emulator version 2.11.1(Debian 1:2.11+dfsg-1ubuntu7.36)
+Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project developers
+
+
+
+TODO: Tests ausführen lassen (auch nativ)
+
+TODO: (Native) Build in Cloud
 
 TODO: Contract Tests zB mit Pact
 
