@@ -177,16 +177,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _sendMessage() {
-    if (_controller.text.isNotEmpty && _channel!=null) {
-      _channel.sink.add(_controller.text);
+    if (_controller.text.isNotEmpty) {
+      _channel?.sink.add(_controller.text);
     }
   }
 
   @override
   void dispose() {
-    if (_channel!=null) {
-      _channel.sink.close();
-    }
+    _channel?.sink.close();
     super.dispose();
   }
 }
