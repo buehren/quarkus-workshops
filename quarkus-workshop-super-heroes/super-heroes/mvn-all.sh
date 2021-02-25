@@ -15,6 +15,7 @@ function run
     for service in $SUPERHERO_SERVICES; do
         echo "======================================= $title: $service ======================================= " && \
         if [ "$service" == "rest-fight" ]; then
+            mkdir -p rest-fight/src/main/resources/META-INF/resources || return
             cp -Rvp ui-super-heroes/dist/* rest-fight/src/main/resources/META-INF/resources || {
                 echo "UI not found: Run ./build-ui.sh"
                 return 1;

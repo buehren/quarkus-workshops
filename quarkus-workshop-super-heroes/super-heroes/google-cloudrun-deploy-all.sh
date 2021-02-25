@@ -31,6 +31,7 @@ function run
     for service in $SUPERHERO_SERVICES; do
         echo "======================================= DEPLOY $DOCKERFILE_TYPE IMAGE: $service ======================================= " && \
 
+        # Service name used in environment variables (upcase and "_" instead of "-")
         SERVICE=${service^^}
         SERVICE=${SERVICE//-/_}
 
