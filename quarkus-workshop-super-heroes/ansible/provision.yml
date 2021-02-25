@@ -52,5 +52,22 @@
       #  release_eventing: v0.19.4
       #  release_client: v0.19.1
 
+    # LxQt Desktop GUI
+    - role: x-lxqt
+
+    # Google Chrome Browser
+    - role: chrome
+
+    # Android SDK
+    - role: android-sdk
+
+#    # Android Studio
+#    - role: android-studio
+
+    # Flutter
+    - role: flutter
+      vars:
+        flutter_channel: beta
+
 #  environment:
 #    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
