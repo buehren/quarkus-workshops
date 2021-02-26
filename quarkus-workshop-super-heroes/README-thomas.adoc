@@ -824,17 +824,29 @@ plink -L 9099:localhost:9099 vagrant@192.168.42.12
 
 done: App
 
-TODO: User Auth (OpenID Connect?)
+TODO: User Auth (OpenID Connect?) +
 Sign out
+
+TODO: Vagrantfile ins Projekt + Port Forwarding einrichten + neue Optionen konfigurierbar und in Basis + Repository für konfigurierbares Vagrantfile als git submodule?
+
+TODO: Ansible-Repo als Submodule + Deployment ohne Ansible Controller VM?
+
+TODO: Repositories in Ferchau-GitLab einrichten
+
+TODO: Problem mit Instant in SuperStats.java + Fight.java, FightService.java
+
+TODO: Problem mit int in Hero.java
+
+TODO: `super-heroes/ui-super-heroes/src/main/resources/META-INF/resources` oder `.../super-heroes`?? Wg. geänderten copy-Befehl in einem Script? (package.sh?)
 
 TODO: Überall 192.168.42.12.xip.io etc. benutzen wg. User Auth (und in Anleitung: bei Google freischalten)
 
 
-TODO: USB unzuverlässig? Über WLAN versuchen?
+done: USB unzuverlässig? Über WLAN versuchen? -> USB 3 scheint OK
 
-TODO: HTTP-Verbindung vom Android-Device zu Services auf Localhost wie? Chrome Devices oder SSH-Tunnel manuell?
+done: HTTP-Verbindung vom Android-Device zu Services auf Localhost wie? Chrome Devices oder SSH-Tunnel manuell?
 
-TODO: ld hat Probleme mit NFS... Bei native build sporadisch
+done: ld hat Probleme mit NFS... Bei native build sporadisch
 
 * `:share_current_dir_nfs_mount_options => %w{rw,async,fsc,nolock,rsize=32768,wsize=32768,hard,noatime,actimeo=2},` +
 Probleme:
@@ -854,7 +866,7 @@ TODO: App an Cloud Events / Kafka anbinden:
     1. Daten je nach Kunde!
     2. ohne eigenes Websocket?
 
-TODO: Funktioniert Flutter in VM mit Android-Handy an USB + Emulator? Dann per Ansible in VM installieren.
+done: Funktioniert Flutter in VM mit Android-Handy an USB + Emulator? Dann per Ansible in VM installieren.
 ----
 > flutter run -d chrome --release --web-hostname localhost --web-port 7357
 No devices found with name or id matching 'chrome'
@@ -873,8 +885,8 @@ Waiting for connection from debug service on Chrome...
 --user-data-dir=/tmp/flutter_tools.SRWVED/flutter_tools_chrome_device.WUFKUW --remote-debugging-port=43043 --disable-background-timer-throttling --disable-extensions --disable-popup-blocking --bwsi --no-first-run --no-default-browser-check --disable-default-apps --disable-translate http://localhost:34965
 ----
 
-TODO: Emulator crasht. Noch mal mit neuester KVM-Version probieren
-
+* TODO: Emulator crasht. Noch mal mit neuester KVM-Version probieren
+----
 (auch schon alt, evtl. selbst compilieren) https://launchpad.net/~jacob/+archive/ubuntu/virtualisation?field.series_filter=bionic
 
 https://mathiashueber.com/manually-update-qemu-on-ubuntu-18-04/
@@ -918,12 +930,18 @@ vagrant@quarkus:~/
 > kvm --version
 QEMU emulator version 2.11.1(Debian 1:2.11+dfsg-1ubuntu7.36)
 Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project developers
+----
 
 
 
 TODO: Tests ausführen lassen (auch nativ)
 
-TODO: (Native) Build in Cloud
+TODO: (Native) Build in Cloud. PC nicht blockiert + Relevant für Gitops
+
+* So? https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker-build
+* Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
+
+
 
 TODO: Contract Tests zB mit Pact
 
@@ -979,30 +997,40 @@ io.netty.channel.epoll.Epoll
      Epoll.unavailabilityCause();
 ----
 
-#TODO: commit#
-
 TODO: simplify HeroResource.getHero() + the same for Fight and Villain (how to return "no content" header with Uni?)
 TODO: simplify HeroService.updateHero() + the same for Fight and Villain
 
-TODO: Fix local access to Google Cloud SQL: connection timed out: /192.168.100.3:5432
-TODO: check/fix drop-and-create with reactive postgresql client
+done: Fix local access to Google Cloud SQL: connection timed out: /192.168.100.3:5432
+done: check/fix drop-and-create with reactive postgresql client
 TODO: Check DB connection on startup
 
-#TODO: Describe or automate required changes for local vs. cloud execution#
+#TODO: Describe or automate changes for local vs. cloud execution#
 ----
 quarkus-workshop-super-heroes/super-heroes/event-statistics/src/main/resources/META-INF/resources/index.html
-var top = new WebSocket("wss://" + host + "/stats/winners"); // for running in Google Cloud Run: wss // for running in local VM: ws
-var team = new WebSocket("wss://" + host + "/stats/team"); // for running in Google Cloud Run: wss // for running in local VM: ws
+
+    var top = new WebSocket("wss://" + host + "/stats/winners"); // for running in Google Cloud Run: wss // for running in local VM: ws
+    var team = new WebSocket("wss://" + host + "/stats/team"); // for running in Google Cloud Run: wss // for running in local VM: ws
+
 
 quarkus-workshop-super-heroes/super-heroes/ui-super-heroes/src/app/shared/api/fight.service.ts
-protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
+
+    protected port = "443"; // for running in Google Cloud Run: "443"; // for running in local VM: "8082";
+
+
+quarkus-workshop-super-heroes/super-heroes/app_superheroes/lib/main.dart
+
+        webSocketUrl:
+          'ws://localhost:8085/stats/winners',
+          //'ws://192.168.42.12:8085/stats/winners',
+          //'wss://event-statistics-vsv4xsncya-ey.a.run.app/stats/winners',
+
 ----
 
 
-TODO: startup time google postgresql
+done: startup time google postgresql
 
 
-TODO: event-statistics ui websocket timeout handling
+TODO: event-statistics web ui websocket reconnect
 
 TODO: Knative Eventing (Cloud Run Eventing) nutzen statt Kafka direkt?
 
@@ -1012,7 +1040,8 @@ done: Google Cloud SQL über private IP verbinden und firewall-regeln dafür ein
 "This guide will help you through the fourth possibility: connecting using service account."  https://github.com/quarkusio/quarkus/pull/6634/files
 I don't think this is necessarily a blocker, as Cloud Run now has Serverless VPC access in beta. This means it's possible to connect directly to Cloud SQL via Private IP without the use of this library.
 
-lokales Knative:
+TODO: Knative lokal:
+
 - TODO: workshop-Images als Services installieren
 - TODO: PostgreSQL + Kafka
 - TODO: Zugriff von anderen Rechnern im Netz
@@ -1022,28 +1051,19 @@ HTTP/1.1 404 Not Found
 
 TODO: workshop-Images und Infrastruktur automatisieren
 
-TODO: Deploy auf Cloud Run mit yaml + kn / kubetcl? Mit .kubeconig? Schon im alten Beispielprojekt? oder im neuen beispielprojekt unter referenzen oben?
+TODO: Deploy auf Cloud Run mit yaml + kn / kubetcl statt gcloud-Kommandozeile? Mit .kubeconig? Schon im alten Beispielprojekt? oder im neuen beispielprojekt unter referenzen oben?
 gcloud run services replace --platform=managed <file.yaml>
 https://github.com/ahmetb/cloud-run-faq#can-i-use-kubectl-to-deploy-to-cloud-run
 
-TODO: Native Executables auch in Cloud Build bauen lassen. (Relevant für Gitops)
-HIER: https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker-build
 
-TODO: Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
-
-TODO: Use Dockerfile.fast-jar and ./mvnw package -Dquarkus.package.type=fast-jar available in later Quarkus versions?
+done: Use Dockerfile.fast-jar and ./mvnw package -Dquarkus.package.type=fast-jar available in later Quarkus versions?
 
 TODO: Oder selbst Container bauen und hochladen: C:\Users\tbuehren\Documents\buehren\playground\cloud\kubernetes\knative\quarkus-in-knative-and-googlecloudrun\README.md
 
 
-TODO: yaml statt gcloud-Kommandozeile?
-
-
-
 TODO: Dieses Wissen zentral ablegen
 
-TODO: Reactive API für DB + alles
+done: Reactive API für DB + alles
 
-
-TODO: Automate setup with Terraform or something similar (or even Vagrant?)
+TODO: Automate Cloud setup with Terraform or something similar (or even Vagrant?)
 
