@@ -79,6 +79,17 @@ export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=""
 ./stop-docker-all.sh
 ----
 
+TODO:
+
+mvn quarkus:dev -DdebugHost=0.0.0.0
+mvn quarkus:dev -Ddebug=false
+
+
+./node_modules/.bin/ng build --prod --base-href "." --watch
++ rm/mkdir/cp-Kommandos aus package.sh
++ touch auf die geänderte datei... (liegt vermutlich an SMB-Mount?)
+
+
 ==== Print Kafka messages
 
 ----
@@ -139,6 +150,155 @@ gcloud services enable \
 ----
 
 #sql-component.googleapis.com \
+
+
+
+???
+
+https://console.developers.google.com/apis/credentials/oauthclient
+Create OAuth client ID
+Type: Web application
+Name: rest-hero
+Authorized redirect URIs
+http://localhost:8082
+http://192.168.42.12.xip.io:8082
+Your Client ID + Your Client Secret notieren
+
+Download client_secret.json
+
+
+TODO: https://firebase.google.com/docs/admin/setup
+
+
+https://firebase.google.com/docs/auth/admin/verify-id-tokens
+
+TODO: Verify ID tokens using the Firebase Admin SDK
+oder: Verify ID tokens using a third-party JWT library
+-> wie in JEE Endpoints?
+Aus einem JWT Token:
+"iss": "https://securetoken.google.com/my-microservices-playground",
+
+mit .well-known/openid-configuration:
+https://securetoken.google.com/my-microservices-playground/.well-known/openid-configuration
+enthält:
+"jwks_uri": "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+-> Quarkus beschwert sich, dass unter dieser URL kein OIDC Server zu finden ist
+
+https://accounts.google.com/o/oauth2/v2/auth
+
+https://cloud.google.com/identity-platform/docs/use-rest-api
+-> https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=[API_KEY] ???
+--> https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=[API_KEY] ???
+
+  <p>The requested URL <code>/v1/accounts:signInWithCustomToken?key=66Eik66EU3WU_rueTSxdbTX4/.well-known/openid-configuration</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+
+
+https://firebase.google.com/docs/auth/admin/manage-sessions#detect_id_token_revocation
+--> Detect ID Token revocation! (aber zusätzlicher HTTP-Request an Google-Server nötig!)
+--> macht quarkus oidc-connect extension das ohnehin? auth-server-url wird angegeben
+
+
+https://quarkus.io/guides/security
+https://quarkus.io/guides/security#openid-connect
+https://quarkus.io/guides/security#smallrye-jwt
+
+
+
+If the OAuth2 Authentication server provides JWT Bearer Tokens then you should consider using either OpenId Connect or MicroProfile JWT RBAC extensions
+
+
+https://quarkus.io/guides/security-openid-connect
+--> Bearer Token Authorization, auch JWT
+
+
+https://quarkus.io/guides/security-jwt
+--> verify JSON Web Tokens
+--> nötig? was wir brauchen, dürfte auch in oidc-connect extension vorhanden sein
+
+
+https://quarkus.io/guides/context-propagation
+--> für Reactive nötig?
+<dependency>
+<groupId>io.quarkus</groupId>
+<artifactId>quarkus-smallrye-context-propagation</artifactId>
+</dependency>
+
+
+https://quarkus.io/guides/security-customization#custom-jax-rs-securitycontext
+--> z.B. um angepassten SecurityPrincipal zu liefern (Name etc.)
+
+
+https://quarkus.io/guides/security-customization#httpauthenticationmechanism-customization
+--> evtl. Google's API hier einbinden (falls nötig... Native evtl. wieder lästig)
+
+
+https://quarkus.io/guides/security-authorization
+
+
+
+
+curl -v -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0ZWFhZjkxM2VlNWY0MDY0YmE2NjUzN2M0Njk3YzY5OGE3NGYwODIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbXktbWljcm9zZXJ2aWNlcy1wbGF5Z3JvdW5kIiwiYXVkIjoibXktbWljcm9zZXJ2aWNlcy1wbGF5Z3JvdW5kIiwiYXV0aF90aW1lIjoxNjE0Njg1MTM2LCJ1c2VyX2lkIjoiSnhYYlhoNExYTU82UDZnZFFkNDhlNTMyTzlKMyIsInN1YiI6Ikp4WGJYaDRMWE1PNlA2Z2RRZDQ4ZTUzMk85SjMiLCJpYXQiOjE2MTQ2ODUxMzYsImV4cCI6MTYxNDY4ODczNiwiZW1haWwiOiJ0aG9tYXMuYnVlaHJlbkBmZXJjaGF1LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRob21hcy5idWVocmVuQGZlcmNoYXUuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.BpWrLWn-KsDp7tvtqzSZgf36iyG8n4IAngVSZU-oJlh4BUB6LFHtCDk5vxwFzwMRqOgsryzPZy9eIAeeRUvEpk-715OQIS-mfrOpAIQf4JzWqxXju0dEWluOKpn51RtOdBAXqpG5VDdOWP14GwAA63bxnVmjj0CZwMYEhCfViiqfAWjoL6oRK9yjtenpWHQtu-io_uQYsvbLZbh0cd8LXUUzGnf4kxhKNsXxXxK7PMtZnT8-GR0EENcDz97XwHObZlrBTdSc7jh001Qa9ZfPR4JcOKgZRI6ltph7ozfG3fTjUV96x6qTbefcqjmYoKz3a4F7GRr1KgPhPbMoW3FE5A" http://192.168.42.12:8082/api/fights/randomfighters
+
+
+
+Token-Prüfung / Logout? Request klappt auch nach Logout bzw. Deaktivierung eines Users bei Google. Müsste mit Firebase-API gehen - aber geht es auch anders? Kürzere Access Token Lifespan einstellbar??
+https://firebase.google.com/docs/auth/admin/manage-sessions#detect_id_token_revocation
+
+
+
+Keycloak:
+
+getestet mit
+docker run --name keycloak -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin -p 8180:8080 quay.io/keycloak/keycloak:10.0.1
+
+
+Damit roles im Token auftauchen:
+
+Standardpfad muss realm_access.roles sein (evtl. zwei Mal ändern und wieder zurück-benennen)
+
+go to Client Scopes > roles Mappers > realm roles
+toggle on the 'Add to userinfo', and off the 'Add to token' ones
+change the 'Token Claim Name' to whatever you want, anything would work
+same applies for client roles, 1. becomes Client Scopes > roles Mappers > client roles
+NB: Roles have to be but in the 'Assigned' column in 'Scope' tab
+
+
+
+TODO: Client muss Re-Login auslösen, wenn Token abgelaufen!!!
+
+TODO: Workaround für WebSocket...? Gibt es das schon fertig?
+https://github.com/quarkusio/quarkus/issues/7414
+You could use a Servlet Filter for authentication purposes.
+https://stackoverflow.com/questions/42644779/how-to-secure-a-websocket-endpoint-in-java-ee
+
+
+#https://firebase.flutter.dev/docs/auth/usage/#
+
+#https://pub.dev/packages/flutter_auth_ui#
+https://pub.dev/packages/firebase_ui
+https://pub.dev/packages/firebase_auth_ui
+https://pub.dev/packages/faui
+https://github.com/kevinjnguyen/flutter-firebase-registration-ui
+https://github.com/putraxor/flutter-login-ui
+
+Web:
+
+https://github.com/FirebaseExtended/flutterfire/blob/master/packages/firebase_auth/firebase_auth_web/README.md
+https://blog.codemagic.io/flutter-web-firebase-authentication-and-google-sign-in/
+
+
+Mit eigener UI:
+
+https://medium.com/flutterdevs/google-sign-in-with-flutter-8960580dec96
+
+https://medium.com/firebase-developers/dive-into-firebase-auth-on-flutter-email-and-link-sign-in-e51603eb08f8
+
+https://dev.to/dav4thevid/set-by-set-guild-on-how-authenticate-your-flutter-app-with-firebase-auth-3lb4
+https://dev.to/dav4thevid/how-to-add-firebase-email-verification-to-your-flutter-app-4cbi
+
+https://medium.com/flutter-community/flutter-implementing-google-sign-in-71888bca24ed
+
 
 ===== Google Cloud SQL
 
@@ -670,7 +830,7 @@ VBoxManage startvm quarkus --type headless
 
 
 port forwarding --> Vagrantfile!
-plink -L 9100:localhost:9100 -L 9099:localhost:9099 -L 8089:localhost:8089 vagrant@192.168.42.12
+plink -batch -N -L 9100:localhost:9100 -L 9099:localhost:9099 -L 8089:localhost:8089 vagrant@192.168.42.12
 
 
 emulator -accel-check
@@ -841,6 +1001,16 @@ TODO: `super-heroes/ui-super-heroes/src/main/resources/META-INF/resources` oder 
 
 TODO: Überall 192.168.42.12.xip.io etc. benutzen wg. User Auth (und in Anleitung: bei Google freischalten)
 
+
+TODO: Abgeschickte Messages aus Flutter werden lokal geloggt, aber in Cloud Run nicht. +
+
+* Der WebsocketChannel wird direkt nach dem Abschicken geschlossen! Warum?
+* Debug-Logs einschalten in Java und in Flutter!
+* Blockiert Google etwas? Wo kann man Logs dazu sehen?
+* Werden sie nicht abgeschickt? Doch, lokal klappt es
+* Kommen sie nicht an? Doch, andere Clients funkionieren aber
+* Funktioniert das Logging nicht? Doch, Nachrichten aus wsdump werden aber geloggt
+* Funktioniert es nicht mit native executable? Doch, lokal funktioniert auch das
 
 done: USB unzuverlässig? Über WLAN versuchen? -> USB 3 scheint OK
 
