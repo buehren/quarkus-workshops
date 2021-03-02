@@ -25,6 +25,9 @@ import {BASE_PATH} from '../variables';
 import {Configuration} from '../configuration';
 
 
+
+declare var global_idToken: any;
+
 @Injectable()
 export class FightService {
 
@@ -91,6 +94,10 @@ export class FightService {
       headers = headers.set('Accept', httpHeaderAcceptSelected);
     }
 
+    if (global_idToken != undefined && global_idToken != "") {
+      headers = headers.set('Authorization', "Bearer "+global_idToken);
+    }
+
     // to determine the Content-Type header
     const consumes: string[] = [];
 
@@ -124,6 +131,10 @@ export class FightService {
     const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
     if (httpHeaderAcceptSelected != undefined) {
       headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    if (global_idToken != undefined && global_idToken != "") {
+      headers = headers.set('Authorization', "Bearer "+global_idToken);
     }
 
     // to determine the Content-Type header
@@ -164,6 +175,10 @@ export class FightService {
     const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
     if (httpHeaderAcceptSelected != undefined) {
       headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    if (global_idToken != undefined && global_idToken != "") {
+      headers = headers.set('Authorization', "Bearer "+global_idToken);
     }
 
     // to determine the Content-Type header
@@ -219,6 +234,10 @@ export class FightService {
       headers = headers.set('Content-Type', httpContentTypeSelected);
     }
 
+    if (global_idToken != undefined && global_idToken != "") {
+      headers = headers.set('Authorization', "Bearer "+global_idToken);
+    }
+
     return this.httpClient.post<URI>(`${this.basePath}/api/fights`,
       body,
       {
@@ -252,6 +271,10 @@ export class FightService {
     const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
     if (httpHeaderAcceptSelected != undefined) {
       headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    if (global_idToken != undefined && global_idToken != "") {
+      headers = headers.set('Authorization', "Bearer "+global_idToken);
     }
 
     // to determine the Content-Type header

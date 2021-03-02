@@ -18,11 +18,134 @@
 
 </head>
 <body>
+<!-- Login Form -->
+<div id="firebaseui-auth-container"></div>
+<button id="sign-out">Sign Out</button>
+<div id="protected-content">
+    This is only shown when the user is logged in.
+</div>
+
 <div class="container">
     <hero-root></hero-root>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/js/patternfly.min.js"></script>
+
+
+
+<!--
+    Add Firebase SDKs from CDN
+    https://firebase.google.com/docs/web/setup#from-the-cdn
+-->
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
+<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
+
+<!--
+    Add configuration for this app as produced by Firebase
+    https://console.firebase.google.com/project/my-microservices-playground/overview
+-->
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyCmQA8e7BEfqXlgLDQdYk2ooP4UCZ9buX4",
+    authDomain: "my-microservices-playground.firebaseapp.com",
+    projectId: "my-microservices-playground",
+    storageBucket: "my-microservices-playground.appspot.com",
+    messagingSenderId: "955718248212",
+    appId: "1:955718248212:web:d2ae449c456e7740fa8401"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+
+<!--
+    User Authentication
+    https://firebase.google.com/docs/auth/web/firebaseui
+-->
+<script type="text/javascript">
+
+    auth_config = {
+      signInOptions: [
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          //requireDisplayName: false,
+          //signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+        }
+      ],
+      callbacks: {
+        signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+          var user = authResult.user;
+          var credential = authResult.credential;
+          var isNewUser = authResult.additionalUserInfo.isNewUser;
+          var providerId = authResult.additionalUserInfo.providerId;
+          var operationType = authResult.operationType;
+
+          // User successfully signed in.
+          return false; // false = do not redirect after login
+        },
+      },
+    };
+
+    // Initialize the FirebaseUI Widget using Firebase.
+    var auth_ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+    // Is there an email link sign-in?
+    //if (auth_ui.isPendingRedirect()) {
+    //    auth_ui.start('#firebaseui-auth-container', auth_config);
+    //}
+</script>
+
+<!--
+    Track the User Auth State
+    https://github.com/firebase/firebaseui-web/blob/master/README.md
+ -->
+<script type="text/javascript">
+
+  global_idToken = "";
+
+  initApp = function() {
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+        user.getIdToken().then(function(idToken) {
+
+          // Send this token (JWT) to your backend via HTTPS
+          // https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients
+          console.log("idToken="+idToken);
+          global_idToken = idToken;
+        });
+
+        document.getElementById('sign-out').style.display = '';
+        document.getElementById('protected-content').style.display = '';
+        connect();
+      } else {
+        // User is signed out. / No user is signed in.
+
+        document.getElementById('protected-content').style.display = 'none';
+        document.getElementById('sign-out').style.display = 'none';
+        auth_ui.start('#firebaseui-auth-container', auth_config);
+      }
+    }, function(error) {
+      console.log(error);
+    });
+
+    document.getElementById('sign-out').addEventListener('click', function() {
+      firebase.auth().signOut();
+    });
+  };
+
+  window.addEventListener('load', function() {
+    initApp()
+  });
+</script>
+
 </body>
 </html>
