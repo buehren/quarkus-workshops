@@ -4,6 +4,9 @@ package io.quarkus.workshop.superheroes.villain;
 // end::adocResource[]
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -17,6 +20,9 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.logging.Logger;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -33,9 +39,14 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 @Path("/api/villains")
 @Produces(APPLICATION_JSON)
+@RolesAllowed("**")
 public class VillainResource {
 
     private static final Logger LOGGER = Logger.getLogger(VillainResource.class);
+
+    @Inject
+    @RequestScoped
+    JsonWebToken jwt;
 
     @Inject
     VillainService service;
@@ -49,7 +60,7 @@ public class VillainResource {
     @GET
     @Path("/random")
     public Uni<Villain> getRandomVillain() {
-        LOGGER.info("getRandomVillain: Start");
+        LOGGER.info("getRandomVillain: Start. jwt="+jwt);
 
         Uni<Villain> villain = service.findRandomVillain();
 
@@ -129,6 +140,7 @@ public class VillainResource {
     @GET
     @Produces(TEXT_PLAIN)
     @Path("/hello")
+    @PermitAll
     public String hello() {
         return "hello";
     }

@@ -4,6 +4,8 @@ package io.quarkus.workshop.superheroes.hero;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 // end::adocResource[]
 // tag::adocMetricsImports[]
 import org.eclipse.microprofile.metrics.MetricUnits;
@@ -23,6 +25,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestSseElementType;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -37,9 +42,14 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 @Path("/api/heroes")
 @Produces(APPLICATION_JSON)
+@RolesAllowed("**")
 public class HeroResource {
 
     private static final Logger LOGGER = Logger.getLogger(HeroResource.class);
+
+    @Inject
+    @RequestScoped
+    JsonWebToken jwt;
 
     @Inject
     HeroService service;
@@ -56,7 +66,7 @@ public class HeroResource {
     @GET
     @Path("/random")
     public Uni<Hero> getRandomHero() {
-        LOGGER.info("getRandomHero: Start");
+        LOGGER.info("getRandomHero: Start. jwt="+jwt);
 
         Uni<Hero> hero = service.findRandomHero();
 
@@ -224,6 +234,7 @@ public class HeroResource {
     @GET
     @Produces(TEXT_PLAIN)
     @Path("/hello")
+    @PermitAll
     public String hello() {
         return "hello";
     }

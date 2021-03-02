@@ -18,7 +18,7 @@
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
   </properties>
-    <!-- end::adocProperties[] -->
+    <!-- e n d : : adocProperties[] -->
 
     <!-- tag::adocDependencyManagement[] -->
   <dependencyManagement>
@@ -80,6 +80,11 @@
       </dependency>
       <!-- end::adocDependencyMetrics[] -->
       <!-- end::adocDependency[] -->
+
+      <dependency>
+          <groupId>io.quarkus</groupId>
+          <artifactId>quarkus-oidc</artifactId>
+      </dependency>
 
       <!-- fault-injection -->
 
