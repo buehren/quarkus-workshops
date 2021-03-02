@@ -98,6 +98,35 @@
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>smallrye-mutiny-vertx-web-client</artifactId>
         </dependency>
+<!--
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-common</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+-->
+<!--
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>smallrye-mutiny-vertx-auth-common</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+-->
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
+        </dependency>
+<!--
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt-build</artifactId>
+        </dependency>
+-->
 
         <!-- Kafka integration -->
         <!-- tag::kafkaDependency[] -->

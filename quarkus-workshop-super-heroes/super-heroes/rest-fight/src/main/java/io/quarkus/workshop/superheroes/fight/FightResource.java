@@ -19,6 +19,9 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.logging.Logger;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -26,15 +29,23 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 import static java.time.Duration.ofSeconds;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 @Path("/api/fights")
 @Produces(APPLICATION_JSON)
+@RolesAllowed("**")
+//@PermitAll
 public class FightResource {
 
     private static final Logger LOGGER = Logger.getLogger(FightResource.class);
+
+    @Inject
+    @RequestScoped
+    JsonWebToken jwt;
 
     @Inject
     FightService service;
@@ -112,6 +123,7 @@ public class FightResource {
     @GET
     @Produces(TEXT_PLAIN)
     @Path("/hello")
+    @PermitAll
     public String hello() {
         return "hello";
     }
