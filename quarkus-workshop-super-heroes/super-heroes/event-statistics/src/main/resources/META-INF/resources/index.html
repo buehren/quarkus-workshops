@@ -230,7 +230,12 @@
         var uid = user.uid;
         var phoneNumber = user.phoneNumber;
         var providerData = user.providerData;
-        user.getIdToken().then(function(accessToken) {
+        user.getIdToken().then(function(idToken) {
+
+          // Send this token (JWT) to your backend via HTTPS
+          // https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients
+          console.log("idToken="+idToken);
+
           document.getElementById('sign-in-status').textContent = 'Signed in';
           document.getElementById('account-details').textContent = JSON.stringify({
             displayName: displayName,
@@ -239,7 +244,7 @@
             phoneNumber: phoneNumber,
             photoURL: photoURL,
             uid: uid,
-            accessToken: accessToken,
+            accessToken: idToken,
             providerData: providerData
           }, null, '  ');
         });
