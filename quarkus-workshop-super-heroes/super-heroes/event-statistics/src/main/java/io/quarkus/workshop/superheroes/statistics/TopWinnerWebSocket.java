@@ -42,11 +42,17 @@ public class TopWinnerWebSocket {
         if (lastPublishedJson!=null) {
             write(session, lastPublishedJson);
         }
+        var logMessage = "TopWinnerWebSocket.onOpen: " +
+            "session.id="+session.getId()+", subprot="+session.getNegotiatedSubprotocol()+", " +
+            "ext="+session.getNegotiatedExtensions()+", session="+session+", " +
+            "lastPublishedJson="+lastPublishedJson;
+        LOGGER.info(logMessage);
     }
 
     @OnClose
     public void onClose(Session session) {
         sessions.remove(session);
+        LOGGER.info("TopWinnerWebSocket.onClose: session.id="+session.getId()+", subprot="+session.getNegotiatedSubprotocol()+", ext="+session.getNegotiatedExtensions()+", session="+session);
     }
 
     @PostConstruct
