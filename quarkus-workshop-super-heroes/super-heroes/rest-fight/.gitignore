@@ -1,2 +1,3 @@
 /Dockerfile
+/.gcloudignore
 /src/main/resources/META-INF/resources/super-heroes/
