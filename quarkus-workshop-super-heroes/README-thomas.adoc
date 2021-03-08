@@ -304,7 +304,10 @@ https://medium.com/flutter-community/flutter-implementing-google-sign-in-71888bc
 
 ====== Deploy Google Cloud SQL Resources
 
-IMPORTANT: The Google Cloud SQL instance costs! +
+IMPORTANT: The Google Cloud SQL instance and VPC connector are associated with costs. Check the <<cloud-cost-report,billing report>>. +
+{empty} +
+To save costs when not needed, you can <<stop-start-cloud-resources,stop>> the cloud resources. +
+{empty} +
 When no longer needed: <<delete-cloud-sql-instance>> and <<delete-cloud-project>>
 
 [source%nowrap,bash]
@@ -390,13 +393,7 @@ gcloud beta sql instances patch $GCLOUD_DB_INSTANCE \
 # (this disables external/local access with cloud-sql-proxy):
 #  --no-assign-ip
 
-gcloud compute networks vpc-access connectors create my-vpc-connector \
-  --network default \
-  --range 192.168.200.0/28 \
-  --region=$GCLOUD_REGION
-gcloud compute networks vpc-access connectors describe my-vpc-connector \
-  --region=$GCLOUD_REGION
-
+./google-cloudrun-vpcconnector-create.sh
 ----
 
 ====== Google Cloud SQL Proxy
@@ -769,6 +766,27 @@ Log explorer!
 time curl $SERVICE_REST_HERO_URL/api/heroes/random
 TODO
 
+
+==== Cost Report [[cloud-cost-report]]
+
+Google Cloud Console: https://console.cloud.google.com/billing/[Billing] -> Select Billing Account -> Reports -> Group by: SKU
+
+==== Stop/Start Google Cloud Resources [[stop-start-cloud-resources]]
+
+To reduce <<cloud-cost-report,costs>> while not using the resources, shut down the most costly resources:
+[source%nowrap,bash]
+----
+
+./google-cloudrun-vpcconnector-delete.sh && \
+./google-cloudsql-stop.sh
+----
+
+Restart the resources:
+[source%nowrap,bash]
+----
+./google-cloudsql-start.sh  && \
+./google-cloudrun-vpcconnector-create.sh
+----
 
 ==== Delete Google Cloud SQL Instance [[delete-cloud-sql-instance]]
 
