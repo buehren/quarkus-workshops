@@ -34,7 +34,7 @@ FROM quay.io/quarkus/quarkus-distroless-image:1.0
 #    chown 1001 /work/run.sh
 
 
-COPY target/*-runner /application
+COPY --chown=nonroot target/*-runner /application
 
 ARG PORT=8080
 ENV PORT="${PORT}"
