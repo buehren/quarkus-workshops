@@ -277,6 +277,15 @@ You could use a Servlet Filter for authentication purposes.
 https://stackoverflow.com/questions/42644779/how-to-secure-a-websocket-endpoint-in-java-ee
 
 
+
+
+https://firebase.flutter.dev/docs/overview/
+https://firebase.flutter.dev/docs/installation/web/
+https://firebase.flutter.dev/docs/installation/android/
+
+https://firebase.flutter.dev/docs/auth/overview
+
+
 #https://firebase.flutter.dev/docs/auth/usage/#
 
 #https://pub.dev/packages/flutter_auth_ui#
@@ -838,6 +847,8 @@ cd super-heroes/app_superheroes
 # Upgrade Flutter and enable Web target
 flutter upgrade
 flutter config --enable-web
+flutter config --enable-linux-desktop
+flutter config --enable-windows-desktop
 
 # Check Flutter requirements
 flutter doctor
@@ -1008,6 +1019,32 @@ An Observatory debugger and profiler on EML L29 is available at: http://127.0.0.
 plink -L 9099:localhost:9099 vagrant@192.168.42.12
 
 
+==== flutter build linux
+
+"build linux" only supported on Linux hosts.
+
+flutter run --observatory-port 9099 -d linux
+
+flutter build linux
+build/linux/release/bundle/app_superheroes
+
+
+ldd build/linux/release/bundle/app_superheroes
+
+To wrap up this application for distribution you need to include everything in the bundle directory, and make sure the Linux system you are installing it upon has all of the system libraries required. This may be as simple as:
+sudo apt-get install libgtk-3-0 libblkid1 liblzma5
+https://flutter.dev/desktop#linux
+
+==== flutter build windows
+
+"build windows" only supported on Windows hosts.
+
+https://flutter.dev/desktop#additional-windows-requirements
+
+
+flutter build windows
+https://flutter.dev/desktop#windows
+
 == Backlog
 
 
@@ -1169,6 +1206,9 @@ TODO: Contract Tests zB mit Pact
 TODO: https://cloud.google.com/run/docs/authenticating/service-to-service
 
 TODO: iOS-App bauen
+
+TODO: MacOS-Anwendung bauen
+flutter create --platforms=macos .
 
 
 
