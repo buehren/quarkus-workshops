@@ -1011,8 +1011,27 @@ plink -L 9099:localhost:9099 vagrant@192.168.42.12
 
 done: App
 
-TODO: User Auth (OpenID Connect?) +
-Sign out
+
+TODO: Probleme im Shared Folder mit Schreibrechten insb. im UI-Verzeichnis (w-Recht fehlt hier bei es5, außerdem fehlt index.html!)
+
+An unhandled exception occurred: EACCES: permission denied, open '/home/vagrant/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/ui-super-heroes/dist/super-heroes/runtime-es5.edb2fcf2778e7bf1d426.js'
+See "/tmp/ng-4EPGDQ/angular-errors.log" for further details.
+
+> ll dist/super-heroes/
+total 556K
+-rwxr-xr-x 1 vagrant vagrant  18K Mar  2 20:49 3rdpartylicenses.txt*
+-rwxr-xr-x 1 vagrant vagrant  948 Mar  2 20:49 favicon.ico*
+-rwxr-xr-x 1 vagrant vagrant 423K Mar  2 20:49 main-es2015.c1c6435c43f67c3e1dc1.js*
+-rwxr-xr-x 1 vagrant vagrant  37K Mar  2 20:49 polyfills-es2015.2987770fde9daa1d8a2e.js*
+-r-xr-xr-x 1 vagrant vagrant    0 Mar  2 20:49 polyfills-es5.6696c533341b95a3d617.js*
+-rwxr-xr-x 1 vagrant vagrant 1.5K Mar  2 20:49 runtime-es2015.edb2fcf2778e7bf1d426.js*
+-r-xr-xr-x 1 vagrant vagrant    0 Mar  2 20:49 runtime-es5.edb2fcf2778e7bf1d426.js*
+-rwxr-xr-x 1 vagrant vagrant  64K Mar  2 20:49 styles.91f6f4cafe63146bcc58.css*
+
+
+TODO: User Auth (OpenID Connect?)
+
+TODO: OIDC: Sign out bzw. kürzere Token-Gültigkeit bzw. Online-Prüfung des Tokens in regelmäßigen Abständen?
 
 TODO: Vagrantfile ins Projekt + Port Forwarding einrichten + neue Optionen konfigurierbar und in Basis + Repository für konfigurierbares Vagrantfile als git submodule?
 
@@ -1133,12 +1152,15 @@ Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project developers
 
 TODO: Tests ausführen lassen (auch nativ)
 
-TODO: (Native) Build in Cloud. PC nicht blockiert + Relevant für Gitops
+done: (Native) Build in Cloud. PC nicht blockiert + Relevant für Gitops
 
-* So? https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker-build
-* Oder cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
+* cloud build auch für native executable verwenden mit two-stage Dockerfile, das es irgendwo gibt
+* hier: https://quarkus.io/guides/building-native-image#using-a-multi-stage-docker-build
 
 
+TODO: Trigger für Cloud-Build einrichten bei Commit/Push
+
+TODO: (Native) Build in Cloud parallelisieren (oder erledigt durch Trigger?)
 
 TODO: Contract Tests zB mit Pact
 
