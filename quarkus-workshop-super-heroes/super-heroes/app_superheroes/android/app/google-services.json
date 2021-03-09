@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "955718248212",
+    "project_id": "my-microservices-playground",
+    "storage_bucket": "my-microservices-playground.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955718248212:android:56d0d4b1837e4b05fa8401",
+        "android_client_info": {
+          "package_name": "com.example.app_superheroes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "955718248212-0n63abqfrfpot2f0lef55tgn9kjdo1js.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrDHQQY4AlwQ-_UAGQT5I62r6rIx8y14E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "955718248212-0n63abqfrfpot2f0lef55tgn9kjdo1js.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
