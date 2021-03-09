@@ -40,6 +40,33 @@
       });
     }
   </script>
+
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+       https://firebase.google.com/docs/web/setup#available-libraries -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-auth.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/ui/4.7.3/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.7.3/firebase-ui-auth.css" />
+
+  <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyCmQA8e7BEfqXlgLDQdYk2ooP4UCZ9buX4",
+        authDomain: "my-microservices-playground.firebaseapp.com",
+        projectId: "my-microservices-playground",
+        storageBucket: "my-microservices-playground.appspot.com",
+        messagingSenderId: "955718248212",
+        appId: "1:955718248212:web:5de2be09faee6112fa8401"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+  </script>
+
+
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>
