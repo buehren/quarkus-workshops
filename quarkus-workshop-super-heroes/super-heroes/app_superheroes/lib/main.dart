@@ -2,15 +2,18 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:app_superheroes/winner_score.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
+
+import 'package:app_superheroes/winner_score.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     final title = 'Super Heroes';
@@ -20,6 +23,9 @@ class MyApp extends StatelessWidget {
         title: title,
         //channel: WebSocketChannel.connect(Uri.parse('wss://echo.websocket.org')),
         webSocketUrl:
+            //'ws://echo.websocket.org/',
+            //'wss://whiteboard-vsv4xsncya-ey.a.run.app/socket.io/?EIO=4&transport=websocket&sid=o96rAY715GjGB9E0AAAC&flutter',
+            //'ws://localhost:8085/stats/winners',
             //'ws://192.168.42.12:8085/stats/winners',
             'wss://event-statistics-vsv4xsncya-ey.a.run.app/stats/winners',
       ),
@@ -42,7 +48,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   final String title;
   final String webSocketUrl;
-  //final WebSocketChannel channel;
 
   MyHomePage({Key? key, required this.title, required this.webSocketUrl})
       : super(key: key);
@@ -55,19 +60,20 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController _controller = TextEditingController();
   StreamController<String> _streamController = StreamController<String>();
   WebSocketChannel? _channel;
+  //WebSocket _webSocket;
   bool _hasStartedConnect = false;
-  bool _isChannelOpen = false;
+  bool _isSocketOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _isChannelOpen = false;
+    _isSocketOpen = false;
     _connect();
   }
 
   _wserror(err) async {
     setState(() {
-      _isChannelOpen = false;
+      _isSocketOpen = false;
     });
 
     print(new DateTime.now().toString() + " Connection error: $err");
@@ -75,15 +81,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _connect() async {
-
     setState(() {
-      _isChannelOpen = false;
+      _isSocketOpen = false;
     });
+
+    if (_channel != null) {
+      print("connect");
+    }
+    //if (_webSocket!=null) {
+    //  print("connect: WebSocket readyState: " + (_webSocket.readyState.toString()));
+    //}
 
     if (_hasStartedConnect) {
       // add in a reconnect delay
       await Future.delayed(Duration(seconds: 4));
     }
+
+    //Future<WebSocket> futureWebSocket;
     setState(() {
       print(new DateTime.now().toString() +
           " Starting connection attempt to " +
@@ -93,6 +107,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _channel = WebSocketChannel.connect(Uri.parse(widget.webSocketUrl));
 
       /* Does not (yet) work in Web mode: "Error: Unsupported operation: Platform._version"
+      //futureWebSocket = WebSocket.connect(widget.webSocketUrl);
+
       WebSocket.connect(widget.webSocketUrl).then((ws) {
         _channel = IOWebSocketChannel(ws);
 
@@ -102,17 +118,39 @@ class _MyHomePageState extends State<MyHomePage> {
 
       _hasStartedConnect = true;
     });
-    _channel?.stream.listen(
-        (data) {
-            print("Received data: $data");
-            setState(() {
-              _isChannelOpen = true;
-            });
-            _streamController.add(data);
-        },
-        onDone: _connect,
-        onError: _wserror,
-        cancelOnError: true);
+
+    _channel?.stream.listen((data) {
+      print("Received data: $data");
+      setState(() {
+        _isSocketOpen = true;
+      });
+      _streamController.add(data);
+    }, onDone: _connect, onError: _wserror, cancelOnError: true);
+
+/*
+    futureWebSocket.then((WebSocket ws) {
+      _webSocket = ws;
+      print("WebSocket readyState: " + (_webSocket.readyState.toString()));
+
+      //print("Sending text to WebSocket before listen");
+      //_webSocket.add("Sending text to WebSocket before listen");
+
+      _webSocket.listen((data) {
+        print("Received data: $data");
+        setState(() {
+          _isSocketOpen = true;
+        });
+        _streamController.add(data);
+      }, onError: _wserror, onDone: _connect);
+
+      //print("Sending text to WebSocket after listen");
+      //_webSocket.add("Sending text to WebSocket after listen");
+
+      // send message
+      //print("Sending hello");
+      //_webSocket.add('hello websocket world');
+    });
+*/
   }
 
   @override
@@ -128,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Form(
               child: TextFormField(
-                enabled: _isChannelOpen,
+                enabled: _isSocketOpen,
                 controller: _controller,
                 decoration:
                     InputDecoration(labelText: 'Schicke eine Nachricht!'),
@@ -141,27 +179,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   List winnerScores = jsonDecode(snapshot.data.toString());
 
                   return Expanded(
-                    child: ListView.builder(
-                      itemCount: winnerScores.length,
-                      itemBuilder: (context, index) {
-                        var winnerScore =
-                            WinnerScore.fromJson(winnerScores[index]);
+                      child: ListView.builder(
+                        itemCount: winnerScores.length,
+                        itemBuilder: (context, index) {
+                          var winnerScore =
+                              WinnerScore.fromJson(winnerScores[index]);
 
-                        return ListTile(
-                          leading: Icon(Icons.wine_bar),
-                          title: Text(winnerScore.name),
-                          trailing: Text(winnerScore.score.toString()),
-                        );
-                      },
-                    )
-                  );
+                          return ListTile(
+                            leading: Icon(Icons.wine_bar),
+                            title: Text(winnerScore.name),
+                            trailing: Text(winnerScore.score.toString()),
+                          );
+                        },
+                    ));
                 } else {
                   return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 60.0),
-                      child: Text('Waiting for winners...'),
-                    )
-                  );
+                      child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 60.0),
+                    child: Text('Waiting for winners...'),
+                  ));
                 }
               },
             )
@@ -169,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _isChannelOpen ? _sendMessage : null,
+        onPressed: _isSocketOpen ? _sendMessage : null,
         tooltip: 'Abschicken',
         child: Icon(Icons.send),
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -178,13 +214,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _sendMessage() {
     if (_controller.text.isNotEmpty) {
+      print("Sending message: " + _controller.text);
       _channel?.sink.add(_controller.text);
+      //_webSocket.add(_controller.text);
     }
   }
 
   @override
   void dispose() {
     _channel?.sink.close();
+    //_webSocket.close();
     super.dispose();
   }
 
@@ -192,5 +231,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<WebSocketChannel>('_channel', _channel));
+    //properties.add(DiagnosticsProperty<WebSocket>('_webSocket', _webSocket));
   }
 }
