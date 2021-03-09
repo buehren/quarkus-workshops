@@ -5,7 +5,7 @@
 
 function run
 {
-    docker-compose stop "$SUPERHERO_SERVICES"
+    docker-compose stop $SUPERHERO_SERVICES
 
     source superhero-services-env.sh || return
 
