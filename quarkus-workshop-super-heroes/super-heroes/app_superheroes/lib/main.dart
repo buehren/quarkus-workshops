@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_auth_ui/flutter_auth_ui.dart';
+
 import 'package:app_superheroes/winner_score.dart';
 
 void main() => runApp(MyApp());
@@ -63,11 +66,25 @@ class _MyHomePageState extends State<MyHomePage> {
   //WebSocket _webSocket;
   bool _hasStartedConnect = false;
   bool _isSocketOpen = false;
+  User? _user = null;
 
   @override
   void initState() {
     super.initState();
     _isSocketOpen = false;
+    _user = null;
+
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      setState(() {
+        _user = user;
+      });
+      if (user == null) {
+        print('User is signed out!');
+      } else {
+        print('User is signed in! ' + user.toString());
+      }
+    });
+
     _connect();
   }
 
@@ -164,6 +181,23 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Visibility(
+              child: ElevatedButton(
+                child: const Text("Login"),
+                onPressed: () async {
+                  startAuthUi();
+                },
+              ),
+              visible: _user == null,
+            ),
+            Visibility(
+              child: ElevatedButton(
+                  child: const Text("Logout"),
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                  }),
+              visible: _user != null,
+            ),
             Form(
               child: TextFormField(
                 enabled: _isSocketOpen,
@@ -225,6 +259,40 @@ class _MyHomePageState extends State<MyHomePage> {
     _channel?.sink.close();
     //_webSocket.close();
     super.dispose();
+  }
+
+  void startAuthUi() {
+    final providers = [
+      //AuthUiItem.AuthAnonymous,
+      AuthUiItem.AuthEmail,
+      //AuthUiItem.AuthPhone,
+      //AuthUiItem.AuthApple,
+      //AuthUiItem.AuthGithub,
+      //AuthUiItem.AuthGoogle,
+      //AuthUiItem.AuthMicrosoft,
+      //AuthUiItem.AuthYahoo,
+    ];
+
+    final result = /*await*/ FlutterAuthUi.startUi(
+      items: providers,
+      tosAndPrivacyPolicy: TosAndPrivacyPolicy(
+        tosUrl: "https://www.example.com/termsofservice",
+        privacyPolicyUrl: "https://www.example.com/privacypolicy",
+      ),
+      //androidOption: AndroidOption(
+      //  enableSmartLock: false, // default true
+      //),
+      emailAuthOption: EmailAuthOption(
+        requireDisplayName: false,
+        // default true
+        enableMailLink: false,
+        // default false
+        handleURL: '',
+        androidPackageName: '',
+        androidMinimumVersion: '',
+      ),
+    );
+    print("Auth result: " + result.toString());
   }
 
   @override
