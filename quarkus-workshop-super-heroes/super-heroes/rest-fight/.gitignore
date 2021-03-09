@@ -1,3 +1,4 @@
 /Dockerfile
 /.gcloudignore
+/cloudbuild.yaml
 /src/main/resources/META-INF/resources/super-heroes/
