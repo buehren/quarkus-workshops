@@ -835,8 +835,7 @@ In X-Windows nötig? sudo -u $USER bash
 ----
 cd super-heroes/app_superheroes
 
-# Switch to Beta Channel (currently required for Web target)
-flutter channel beta
+# Upgrade Flutter and enable Web target
 flutter upgrade
 flutter config --enable-web
 
@@ -894,7 +893,7 @@ cd super-heroes/app_superheroes
 flutter clean
 
 #
-flutter run -d web-server --web-port 8089 --observatory-port 9099 --web-hostname 0.0.0.0
+flutter run --no-sound-null-safety -d web-server --web-port 8089 --observatory-port 9099 --web-hostname 0.0.0.0
 http://127.0.0.1:8089/
 http://192.168.42.12:8089/
 DEBUG PORT??
@@ -906,13 +905,13 @@ http://192.168.42.12:9099/AUTH_CODE=/
 
 # Build and run/debug app in Web browser
 flutter build web
-flutter run -d chrome
+flutter run --no-sound-null-safety -d chrome
 
 # Build and run/debug app in Android Emulator
 flutter build apk
 # Start Emulator in Android Studio -> Android Virtual Device Manager
 flutter devices
-flutter run --observatory-port 9099 -d emulator-5554 # use listed device name
+flutter run --no-sound-null-safety --observatory-port 9099 -d emulator-5554 # use listed device name
 
 # TODO: Build iOS App
 flutter build ipa # MacOS only
@@ -986,9 +985,9 @@ In X-Windows nötig? sudo -u $USER bash
 [source%nowrap,bash]
 ----
 flutter devices                  # connected Android device should be listed
-flutter run --observatory-port 9099 -d UBV7N18A12345678  # use listed device name
+flutter run --no-sound-null-safety --observatory-port 9099 -d UBV7N18A12345678  # use listed device name
 
-flutter run --observatory-port 9099 -d 192.168.1.76:5555
+flutter run --no-sound-null-safety --observatory-port 9099 -d 192.168.1.76:5555
 
 ----
 
