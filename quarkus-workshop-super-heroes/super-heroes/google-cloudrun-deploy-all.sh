@@ -8,7 +8,7 @@
 
 function run
 {
-    DOCKERFILE_TYPE="${1:-native}"  # If parameter not set or null, use native.
+    DOCKERFILE_TYPE="${1:-native}"  # If parameter not set or null, use native. See build-docker-all.sh for options!
 
     source superhero-services-env.sh || return
     source google-cloudrun-env.sh || return
@@ -22,8 +22,16 @@ function run
 
         cd $service  || return 1
         \cp -pfv src/main/docker/Dockerfile.$DOCKERFILE_TYPE ./Dockerfile  || return 1
+        \cp -pfv src/main/gcloud/cloudbuild.yaml ./cloudbuild.yaml  || return 1
         \cp -pfv src/main/gcloud/.gcloudignore.$DOCKERFILE_TYPE ./.gcloudignore  || return 1
-        gcloud builds submit --tag eu.gcr.io/$GCLOUD_PROJECT_ID/$service  || return 1
+        gcloud builds submit \
+            --config=cloudbuild.yaml \
+            --substitutions \
+                _GCLOUD_PROJECT_ID="$GCLOUD_PROJECT_ID",_SERVICE="$service",_MAVEN_EXTRA_ARGS="$MAVEN_EXTRA_ARGS",_QUARKUS_PROFILE="$QUARKUS_PROFILE" \
+            || return 1
+            #--region="$GCLOUD_REGION" \
+
+        #gcloud builds submit --tag eu.gcr.io/$GCLOUD_PROJECT_ID/$service  || return 1
         cd .. || return 1
     done
 
