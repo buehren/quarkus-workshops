@@ -19,6 +19,13 @@ function run
     # We use Google Cloud Build for that but could also do it ourselves.
     for service in $SUPERHERO_SERVICES; do
         echo "======================================= BUILD $DOCKERFILE_TYPE IMAGE: $service ======================================= " && \
+        if [ "$service" == "rest-fight" ]; then
+            mkdir -p rest-fight/src/main/resources/META-INF/resources || return
+            cp -Rvp ui-super-heroes/dist/* rest-fight/src/main/resources/META-INF/resources || {
+                echo "UI not found: Run ./build-ui.sh"
+                return 1;
+            }
+        fi
 
         cd $service  || return 1
         \cp -pfv src/main/docker/Dockerfile.$DOCKERFILE_TYPE ./Dockerfile  || return 1
@@ -33,6 +40,13 @@ function run
 
         #gcloud builds submit --tag eu.gcr.io/$GCLOUD_PROJECT_ID/$service  || return 1
         cd .. || return 1
+
+        if [ "$service" == "rest-fight" ]; then
+            ls -d rest-fight/src/main/resources/META-INF/resources/super-heroes || {
+                echo "UI no longer found after build: Maybe it was deleted by rsync?"
+                return 1;
+            }
+        fi
     done
 
     # Deploy Docker images to Google Cloud Run
