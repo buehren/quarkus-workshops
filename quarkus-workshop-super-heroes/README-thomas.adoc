@@ -269,13 +269,6 @@ NB: Roles have to be but in the 'Assigned' column in 'Scope' tab
 
 
 
-TODO: Client muss Re-Login auslösen, wenn Token abgelaufen!!!
-
-TODO: Workaround für WebSocket...? Gibt es das schon fertig?
-https://github.com/quarkusio/quarkus/issues/7414
-You could use a Servlet Filter for authentication purposes.
-https://stackoverflow.com/questions/42644779/how-to-secure-a-websocket-endpoint-in-java-ee
-
 
 
 
@@ -1068,7 +1061,14 @@ total 556K
 -rwxr-xr-x 1 vagrant vagrant  64K Mar  2 20:49 styles.91f6f4cafe63146bcc58.css*
 
 
-TODO: User Auth (OpenID Connect?)
+done: User Auth (OpenID Connect?)
+
+TODO: Client muss Re-Login auslösen, wenn Token abgelaufen!!!
+
+TODO: Auth Workaround für WebSocket...? Gibt es das schon fertig?
+https://github.com/quarkusio/quarkus/issues/7414
+You could use a Servlet Filter for authentication purposes.
+https://stackoverflow.com/questions/42644779/how-to-secure-a-websocket-endpoint-in-java-ee
 
 TODO: OIDC: Sign out bzw. kürzere Token-Gültigkeit bzw. Online-Prüfung des Tokens in regelmäßigen Abständen?
 
