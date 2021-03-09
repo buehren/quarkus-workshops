@@ -7,7 +7,7 @@ steps:
     - --build-arg=MAVEN_EXTRA_ARGS=$_MAVEN_EXTRA_ARGS
     - --build-arg=QUARKUS_PROFILE=$_QUARKUS_PROFILE
 options:
-  machineType: 'E2_HIGHCPU_8'
+  machineType: 'E2_HIGHCPU_32'
 
 #steps:
 #- name: 'gcr.io/cloud-builders/docker'
