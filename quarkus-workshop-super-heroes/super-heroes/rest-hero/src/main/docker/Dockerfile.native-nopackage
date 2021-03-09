@@ -1,24 +1,22 @@
-## Stage 1 : build with maven builder image with native capabilities
-
-FROM quay.io/quarkus/centos-quarkus-maven:21.0-java11 AS build
-COPY pom.xml /usr/src/app/
-RUN mvn -f /usr/src/app/pom.xml -B de.qaware.maven:go-offline-maven-plugin:1.2.5:resolve-dependencies
-COPY src /usr/src/app/src
-USER root
-RUN chown -R quarkus /usr/src/app
-USER quarkus
-
-ARG MAVEN_EXTRA_ARGS=""
-ENV MAVEN_EXTRA_ARGS="${MAVEN_EXTRA_ARGS}"
-RUN echo ${MAVEN_EXTRA_ARGS}
-
-RUN mvn -f /usr/src/app/pom.xml -Pnative clean package -DskipTests ${MAVEN_EXTRA_ARGS}
-
-
-
-## Stage 2 : create the docker final image
-
+####
+# This Dockerfile is used in order to build a distroless container that runs the Quarkus application in native (no JVM) mode
+#
+# Before building the container image run:
+#
+# ./mvnw package -Pnative
+#
+# Then, build the image with:
+#
+# docker build -f src/main/docker/Dockerfile.native-distroless -t quarkus/my-artifactId .
+#
+# Then run the container using:
+#
+# docker run -i --rm -p 8080:8080 quarkus/my-artifactId
+#
+###
 FROM quay.io/quarkus/quarkus-distroless-image:1.0
+
+
 
 
 # Start Google Cloud SQL Proxy in Container to enable access to Google Cloud SQL (PostgreSQL)
@@ -36,7 +34,7 @@ FROM quay.io/quarkus/quarkus-distroless-image:1.0
 #    chown 1001 /work/run.sh
 
 
-COPY --chown=nonroot --from=build /usr/src/app/target/*-runner /application
+COPY --chown=nonroot target/*-runner /application
 
 ARG PORT=8080
 ENV PORT="${PORT}"
