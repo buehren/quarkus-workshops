@@ -72,11 +72,15 @@ export QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=""
 ./stop-native-all.sh
 
 
-# Build and run Docker images:
+# Build and run native executables and Docker images:
 ./build-docker-all.sh
 ./run-docker-all.sh
 # Now visit the displayed URLs (use 192.168.42.12 instead of localhost)
 ./stop-docker-all.sh
+
+# Alternative:
+# To build the Docker images from native executables built before (see above):
+./build-docker-all.sh native-nopackage
 ----
 
 TODO:
@@ -737,12 +741,18 @@ cd ~/quarkus/quarkus-workshops/quarkus-workshop-super-heroes/super-heroes/
 # (with the required services instead of the example):
 #export SUPERHERO_SERVICES="event-statistics rest-fight"
 
-# Build native executables for Google Cloud Run / Google Cloud SQL:
-# (NOT NECESSARY if your last build was native with the googlecloudsql environment variables set)
-./build-ui.sh && ./google-cloudrun-build-native-all.sh
+# Build UI (required for rest-fight):
+./build-ui.sh
 
-# Deploy to Google Cloud Run
+# Build native executables and Docker images in Google Cloud Build
+# and deploy to Google Cloud Run:
 ./google-cloudrun-deploy-all.sh native
+
+
+# Alternative:
+# To build the native executables locally
+# and only build the Docker images in Google Cloud Build:
+./google-cloudrun-build-native-all.sh && ./google-cloudrun-deploy-all.sh native-nopackage
 ----
 
 ==== Send requests
