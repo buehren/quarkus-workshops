@@ -850,7 +850,7 @@ oder VirtualBox: Zeigen
 vagrant / vagrant
 startx
 
-VirtualBox-Menüs anzeigen / verstecken: HOST+C (Standard: HOST=Strg)
+VirtualBox-Menüs anzeigen / verstecken: HOST+C (Standard: HOST=Right-Ctrl)
 
 GUI abschalten:
 VBoxManage startvm quarkus --type headless
@@ -902,6 +902,8 @@ http://192.168.42.12:9099/AUTH_CODE=/
 
 
 
+# Run the following run commands in X-Windows or set DISPLAY variable, e.g.
+# export DISPLAY=:0
 
 # Build and run/debug app in Web browser
 flutter build web
