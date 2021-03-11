@@ -4,6 +4,10 @@ function run
 {
     source ./google-cloudrun-env.sh || return
 
+    gcloud compute networks vpc-access connectors list \
+      --region=$GCLOUD_REGION \
+      || return
+
     gcloud compute networks vpc-access connectors create my-vpc-connector \
       --network default \
       --range 192.168.200.0/28 \
