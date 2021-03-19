@@ -121,7 +121,10 @@
       <version>1.15.1</version>
       <scope>test</scope>
     </dependency>
-        <!-- end::adocDependencyTestContainers[] -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-graphql</artifactId>
+    </dependency>
   </dependencies>
 
     <!-- tag::adocBuild[] -->

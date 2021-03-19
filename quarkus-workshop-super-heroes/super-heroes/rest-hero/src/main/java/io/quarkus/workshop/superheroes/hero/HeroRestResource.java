@@ -34,7 +34,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.time.Duration;
-import java.util.List;
 
 import static java.time.Duration.*;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -43,9 +42,9 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 @Path("/api/heroes")
 @Produces(APPLICATION_JSON)
 @RolesAllowed("**")
-public class HeroResource {
+public class HeroRestResource {
 
-    private static final Logger LOGGER = Logger.getLogger(HeroResource.class);
+    private static final Logger LOGGER = Logger.getLogger(HeroRestResource.class);
 
     @Inject
     @RequestScoped
