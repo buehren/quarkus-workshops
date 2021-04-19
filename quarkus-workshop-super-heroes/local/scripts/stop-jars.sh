@@ -5,7 +5,7 @@
 
 function run
 {
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     for service in $SUPERHERO_SERVICES ui-super-heroes; do
         pgrep -af "java .*-jar $service/target/quarkus-app/quarkus-run\.jar"

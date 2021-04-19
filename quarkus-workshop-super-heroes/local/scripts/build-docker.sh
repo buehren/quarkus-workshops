@@ -32,7 +32,7 @@ function run
     # Replace tbuehren with your DockerHub / Quay.io username.
     ORG="${2:-tbuehren}"
 
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     # Build Docker images containing the native executables.
     # We use Google Cloud Build for that but could also do it ourselves.

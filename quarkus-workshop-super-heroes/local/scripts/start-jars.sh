@@ -12,7 +12,7 @@
 
 function run
 {
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     for service in $SUPERHERO_SERVICES ui-super-heroes; do
         echo "======================================= RUN JAR: $service ======================================= " && \

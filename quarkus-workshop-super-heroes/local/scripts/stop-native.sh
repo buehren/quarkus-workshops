@@ -5,7 +5,7 @@
 
 function run
 {
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     for service in $SUPERHERO_SERVICES; do
         pgrep -af "$service/target/$service-01-runner[^.]*"

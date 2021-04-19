@@ -14,7 +14,7 @@ function run
     echo mvn_phases="$mvn_phases"
     echo mvn_params="$mvn_params"
 
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     for service in $SUPERHERO_SERVICES; do
         echo "======================================= $title: $service ======================================= " && \

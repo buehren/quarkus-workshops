@@ -17,7 +17,7 @@ function run
 {
     ./mvn.sh "COMPILING" "compile" "$MAVEN_EXTRA_ARGS"  || return
 
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     for service in $SUPERHERO_SERVICES ui-super-heroes; do
         echo "======================================= START DEV MODE: $service ======================================= " && \

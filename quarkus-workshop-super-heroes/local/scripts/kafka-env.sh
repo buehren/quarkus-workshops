@@ -2,7 +2,7 @@
 
 function run
 {
-    source superhero-services-env.sh || return
+    source services-env.sh || return
 
     KAFKA_CLUSTER_BOOTSTRAP_SERVERS=$( sed '1q;d' ~/.kafka-api-key )
     KAFKA_CLUSTER_API_KEY=$( sed '2q;d' ~/.kafka-api-key )
