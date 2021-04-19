@@ -1,0 +1,9 @@
+.gcloudignore
+.git
+.gitignore
+*.tfstate
+*.tfstate*.backup
+terraform.tfstate.d/
+.terraform
+.terraform.lock.hcl
+tfplan
