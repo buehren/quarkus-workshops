@@ -1,0 +1,40 @@
+## Stage 1: Build with maven builder image with native capabilities
+
+FROM quay.io/quarkus/centos-quarkus-maven:21.0-java11 AS build
+
+# berglas fetches secrets for environment variables "sm://$PROJECT_ID/..." from GCP Secret Manager
+ADD https://storage.googleapis.com/berglas/main/linux_amd64/berglas /usr/bin/
+USER root
+RUN chmod ogu+x /usr/bin/berglas
+USER quarkus
+
+ARG MAVEN_EXTRA_ARGS=""
+ENV MAVEN_EXTRA_ARGS="${MAVEN_EXTRA_ARGS}"
+RUN echo ${MAVEN_EXTRA_ARGS}
+
+COPY pom.xml /usr/src/app/
+RUN mvn -f /usr/src/app/pom.xml -Pnative -B de.qaware.maven:go-offline-maven-plugin:1.2.8:resolve-dependencies ${MAVEN_EXTRA_ARGS}
+
+COPY src /usr/src/app/src
+USER root
+RUN chown -R quarkus /usr/src/app
+USER quarkus
+
+RUN mvn -f /usr/src/app/pom.xml -Pnative clean package -DskipTests ${MAVEN_EXTRA_ARGS}
+
+
+
+## Stage 2: Create the final docker image
+
+FROM quay.io/quarkus/quarkus-distroless-image:1.0
+
+COPY --from=build --chown=nonroot /usr/bin/berglas /usr/bin/
+COPY --from=build --chown=nonroot /usr/src/app/target/*-runner /application
+
+ARG PORT=8080
+ENV PORT="${PORT}"
+EXPOSE ${PORT}
+
+USER nonroot
+
+ENTRYPOINT ["/usr/bin/berglas", "-l", "debug", "exec", "--", "./application", "-Dquarkus.http.host=0.0.0.0", "-Dquarkus.http.port=${PORT}"]
