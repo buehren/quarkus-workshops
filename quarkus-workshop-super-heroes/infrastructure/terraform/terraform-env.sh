@@ -14,17 +14,26 @@ function run
     echo "TERRAFORM_ENVIRONMENT=$TERRAFORM_ENVIRONMENT"
 
     # Workspaces are currently not used (replaced by environment directories for separate states)
-    #terraform_workspace=$( terraform workspace show ) || return 101
+    #terraform_workspace=$( terraform workspace show ) || return 100
     #echo "TERRAFORM WORKSPACE: $terraform_workspace"
 
-    local environment=$( grep -hoP "(?<=environment=\").*(?=\")" terraform.tfvars ) || return 101
-    echo "ENVIRONMENT=$environment"
+    local environment=$( grep -hoP "(?<=environment=\").*(?=\")" terraform.tfvars ) || return 100
+    echo "environment=$environment"
+    if [[ "$environment" != "$TERRAFORM_ENVIRONMENT" ]]; then
+        echo "GCP Project ID from environment variable GCP_PROJECT_ID does not match gcp_project_id from terraform.tfvars"
+        echo "    GCP_PROJECT_ID=$GCP_PROJECT_ID"
+        echo "    gcp_project_id=$gcp_project_id"
+        echo "Please login to Google Cloud and set default project id:"
+        echo "    gcloud auth login"
+        echo "    gcloud config set project PROJECT_ID"
+        return 1
+    fi
     echo ""
 
 
     # Google Cloud Platform
 
-    source "$DIR"/../../super-heroes/gcp-env.sh
+    source "$DIR"/../../scripts/gcp-env.sh || return 101
 
     #gcp_project_id=$( grep -oP "(?<=^gcp_project_id=\").*(?=\")" "$terraform_workspace".tfvars ) || return 102
     local gcp_project_id=$( grep -hoP "(?<=gcp_project_id=\").*(?=\")" terraform.tfvars ) || return 102
@@ -45,8 +54,9 @@ function run
 
     export GCP_BUCKETS_LOCATION="eu"
 
+
     # Create service account and credentials file for terraform (if required)
-    "$DIR"/../../super-heroes/gcp-iam-serviceaccount.sh \
+    "$DIR"/../../scripts/gcp-iam-serviceaccount.sh \
         "$gcp_project_id" \
         "$gcp_account_name" \
         "$gcp_credentials_file" \
@@ -60,15 +70,19 @@ function run
     export GOOGLE_APPLICATION_CREDENTIALS="$gcp_credentials_file"
     echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
 
+    echo ""
+
 
     # Create Google Cloud Storage Bucket for saving the Terraform state
 
-    GCLOUD_BUCKET_TERRAFORM="$GCP_PROJECT_ID"_terraform
+    GCLOUD_BUCKET_TERRAFORM="${GCP_PROJECT_ID}_${TERRAFORM_ENVIRONMENT}_terraform"
     echo "GCLOUD_BUCKET_TERRAFORM=$GCLOUD_BUCKET_TERRAFORM, location=$GCP_BUCKETS_LOCATION"
     if ! gsutil ls "gs://$GCLOUD_BUCKET_TERRAFORM"; then
         gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://$GCLOUD_BUCKET_TERRAFORM"  || return 121
         gsutil versioning set on "gs://$GCLOUD_BUCKET_TERRAFORM" || return 122
     fi
+
+    echo ""
 
 
     # MongoDB Atlas
@@ -79,7 +93,7 @@ function run
     #local mongodb_project_id=$( grep -oP "(?<=^mongodbatlas_project_id=\").*(?=\")" "$terraform_workspace".tfvars ) || return 103
     local mongodb_project_id=$( grep -hoP "(?<=mongodbatlas_project_id=\").*(?=\")" terraform.tfvars ) || return 141
 
-    source "$DIR"/../../super-heroes/mongodbatlas-env.sh "$mongodb_project_id" || return
+    source "$DIR"/../../scripts/mongodbatlas-env.sh "$mongodb_project_id" || return
     # environment variables for Terraform module
     export MONGODB_ATLAS_PROJECT_ID="$ATLAS_PROJECT_ID"
     echo "MONGODB_ATLAS_PROJECT_ID=$MONGODB_ATLAS_PROJECT_ID"

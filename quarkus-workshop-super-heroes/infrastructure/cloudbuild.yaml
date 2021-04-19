@@ -93,7 +93,7 @@ steps:
           && terraform output -json > /workspace/default.tfstate.output.json
         else
           echo "***************************** SKIPPING APPLYING *******************************"
-          echo "No Terraform environment '$BRANCH_NAME', skipping terraform apply."
+          echo "No terraform/environments/$BRANCH_NAME, skipping terraform apply."
           echo "*******************************************************************************"
         fi
 
