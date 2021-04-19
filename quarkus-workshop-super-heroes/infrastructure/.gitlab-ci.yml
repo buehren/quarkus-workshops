@@ -6,5 +6,5 @@ terraform:
     - docker:dind
   script:
     #- gcloud auth activate-service-account --key-file <(echo -n "${GCP_SERVICEACCOUNT_KEY}" | base64 -d )
-    - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEY
+    - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEYFILE
     - ./cloudbuild.sh
