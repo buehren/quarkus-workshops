@@ -3,9 +3,11 @@ package io.quarkus.workshop.superheroes.villain;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import org.bson.types.ObjectId;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -16,33 +18,35 @@ import static javax.transaction.Transactional.TxType.SUPPORTS;
 @Transactional(REQUIRED)
 public class VillainService {
 
+    @Inject
+    VillainRepository repository;
+
     @ConfigProperty(name = "level.multiplier", defaultValue="1")
     int levelMultiplier;
 
     @Transactional(SUPPORTS)
     public Uni<Long> getVillainsCount() {
-        return Villain.count();
+        return repository.count();
     }
 
     @Transactional(SUPPORTS)
     public Multi<Villain> findAllVillains() {
-        return Villain.streamAll();
+        return repository.streamAll();
     }
 
     @Transactional(SUPPORTS)
-    public Uni<Villain> findVillainById(Long id) {
-        return Villain.findById(id);
+    public Uni<Villain> findVillainById(String id) {
+        return repository.findById(new ObjectId(id));
     }
 
     @Transactional(SUPPORTS)
     public Uni<Villain> findRandomVillain() {
-        return Villain.findRandom();
+        return repository.findRandom();
     }
 
-    public Villain persistVillain(@Valid Villain villain) {
+    public Uni<Void> persistVillain(@Valid Villain villain) {
         villain.level = villain.level * levelMultiplier;
-        villain.persist();
-        return villain;
+        return repository.persist(villain);
     }
 
     public Uni<Villain> updateVillain(@Valid Villain villain) {
@@ -58,8 +62,8 @@ public class VillainService {
         return entity;
     }
 
-    public void deleteVillain(Long id) {
-        Villain.deleteById(id);
+    public void deleteVillain(String id) {
+        repository.deleteById(new ObjectId(id));
     }
 }
 // end::adocTransactional[]

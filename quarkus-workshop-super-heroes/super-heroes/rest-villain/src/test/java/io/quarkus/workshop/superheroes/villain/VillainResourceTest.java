@@ -4,6 +4,7 @@ package io.quarkus.workshop.superheroes.villain;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.common.mapper.TypeRef;
+import org.bson.types.ObjectId;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -193,7 +194,7 @@ public class VillainResourceTest {
     @Order(3)
     void testUpdatingAnItem() {
         Villain villain = new Villain();
-        villain.id = Long.valueOf(villainId);
+        villain.id = new ObjectId(villainId);
         villain.name = UPDATED_NAME;
         villain.otherName = UPDATED_OTHER_NAME;
         villain.picture = UPDATED_PICTURE;
