@@ -50,16 +50,9 @@ public class VillainService {
     }
 
     public Uni<Villain> updateVillain(@Valid Villain villain) {
-        Uni<Villain> entity = Villain.findById(villain.id);
-        entity.onItem().transform(villainItem -> {
-            villainItem.name = villain.name;
-            villainItem.otherName = villain.otherName;
-            villainItem.level = villain.level;
-            villainItem.picture = villain.picture;
-            villainItem.powers = villain.powers;
-            return villainItem.persist();
-        });
-        return entity;
+        return repository
+            .update(villain)
+            .chain(() -> repository.findById(villain.id));
     }
 
     public void deleteVillain(String id) {

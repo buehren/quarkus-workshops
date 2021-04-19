@@ -89,11 +89,10 @@ public class VillainResource {
     // end::adocMetrics[]
     @GET
     @Path("/{id}")
-    public Uni<Response> getVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") Long id) {
-        Uni<Villain> villain = service.findVillainById(id);
-        return villain
-            //.onItem().delayIt().by(Duration.ofMillis(100))
-            .onItem().transform(item -> Response.ok(villain).build())
+    public Uni<Response> getVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") String id) {
+        return service
+            .findVillainById(id)
+            .map(item -> Response.ok(item).build())
             .ifNoItem().after(ofSeconds(1)).recoverWithUni(Uni.createFrom().item(Response.noContent().build()))
             .onFailure().transform(failure -> new ServiceUnavailableException(failure.getMessage(), Response.serverError().build(), failure));
     }
@@ -105,11 +104,12 @@ public class VillainResource {
     @Timed(name = "timeCreateVillain", description = "Times how long it takes to invoke the createVillain method", unit = MetricUnits.MILLISECONDS)
     // end::adocMetrics[]
     @POST
-    public Response createVillain(@RequestBody(required = true, content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = Villain.class)))  @Valid Villain villain, @Context UriInfo uriInfo) {
-        villain = service.persistVillain(villain);
-        UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(Long.toString(villain.id));
-        LOGGER.debug("New villain will be created with URI " + builder.build().toString());
-        return Response.created(builder.build()).build();
+    public Uni<Response> createVillain(@RequestBody(required = true, content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = Villain.class)))  @Valid Villain villain, @Context UriInfo uriInfo) {
+        return service.persistVillain(villain).chain( () -> {
+            UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(villain.id.toString());
+            LOGGER.debug("New villain created with URI " + builder.build().toString());
+            return Uni.createFrom().item(Response.created(builder.build()).build());
+        });
     }
 
     @Operation(summary = "Updates an exiting  villain")
@@ -131,7 +131,7 @@ public class VillainResource {
     // end::adocMetrics[]
     @DELETE
     @Path("/{id}")
-    public Response deleteVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") Long id) {
+    public Response deleteVillain(@Parameter(description = "Villain identifier", required = true) @PathParam("id") String id) {
         service.deleteVillain(id);
         LOGGER.debug("Villain will be deleted with " + id);
         return Response.noContent().build();
