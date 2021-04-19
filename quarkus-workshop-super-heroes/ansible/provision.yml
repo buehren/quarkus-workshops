@@ -18,6 +18,12 @@
     # Maven
     - role: maven
 
+    # Graal Native Image Agent
+    - role: graal-native-image-agent
+      vars:
+      # uncomment release_graalvm to use specific release and skip detection of the latest release:
+      #  release_graalvm: vm-20.3.0
+
     # Docker
     - role: docker
 
@@ -27,14 +33,23 @@
     # PostgreSQL CLI
     - role: postgresql-client
 
-    # Graal Native Image Agent
-    - role: graal-native-image-agent
-      vars:
-      # uncomment release_graalvm to use specific release and skip detection of the latest release:
-      #  release_graalvm: vm-20.3.0
+    # MongoDB shell
+    - role: mongodbshell
+
+    # Python API for MongoDB Atlas + atlascli
+    - role: mongodbatlascli
+
+    # Confluent Cloud (Serverless Apache Kafka) CLI
+    - role: ccloud-cli
 
     # Google Cloud CLI
     - role: gcloud-cli # update gcloud_version in role directory gcloud-cli/defaults/main.yml
+
+    # Terraform CLI
+    - role: terraform
+
+    # Terragrunt CLI
+    #- role: terragrunt
 
     # Local Kubernetes and Knative installation
     - role: k3s
