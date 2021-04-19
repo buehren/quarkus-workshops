@@ -12,4 +12,4 @@ function run
     # end::adocShell[]
 }
 
-run "$1" || ( echo "An ERROR occured!"; false )
+run "$1" || ( echo "An ERROR occured! $?"; false )
