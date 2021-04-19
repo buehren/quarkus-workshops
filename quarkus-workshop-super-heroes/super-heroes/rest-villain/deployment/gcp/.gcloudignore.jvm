@@ -1,8 +1,8 @@
 .gcloudignore
 .git
 .gitignore
-/.mvn/
+/.*/
+/infrastructure/
 /src/*
-!/src/main/docker/
 /target/*
 !/target/quarkus-app/**

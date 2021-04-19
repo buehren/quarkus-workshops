@@ -1,17 +1,17 @@
 \set ON_ERROR_STOP on
 
 
-CREATE SEQUENCE public.hibernate_sequence
+CREATE SEQUENCE villain.hibernate_sequence
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER TABLE public.hibernate_sequence OWNER TO superbad;
+ALTER TABLE villain.hibernate_sequence OWNER TO service_villain;
 
 
-CREATE TABLE public.villain (
+CREATE TABLE villain.villain (
     id bigint NOT NULL,
     level integer NOT NULL,
     name character varying(255),
@@ -20,7 +20,7 @@ CREATE TABLE public.villain (
     powers text
 );
 
-ALTER TABLE public.villain OWNER TO superbad;
+ALTER TABLE villain.villain OWNER TO service_villain;
 
-ALTER TABLE ONLY public.villain
+ALTER TABLE ONLY villain.villain
     ADD CONSTRAINT villain_pkey PRIMARY KEY (id);
