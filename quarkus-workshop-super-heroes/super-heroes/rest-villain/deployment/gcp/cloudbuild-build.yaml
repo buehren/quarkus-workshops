@@ -1,0 +1,47 @@
+# Build Docker image containing the native executable in Google Cloud Build
+# and push the image to Google Container Registry.
+
+steps:
+
+- id: print_info
+  name: 'gcr.io/cloud-builders/gcloud-slim'
+  entrypoint: 'bash' # https://cloud.google.com/build/docs/configuring-builds/run-bash-scripts
+  args:
+    - '-c'
+    - |-
+      echo "_SERVICE=${_SERVICE}"
+      echo ""
+      echo "PROJECT_ID=${PROJECT_ID}"
+      echo "BRANCH_NAME=${BRANCH_NAME} (Terraform environment)"
+      echo "COMMIT_SHA=${COMMIT_SHA} (Image Tag)"
+      echo ""
+      echo "_DOCKERFILE=${_DOCKERFILE}"
+      echo ""
+      echo "_MAVEN_EXTRA_ARGS=${_MAVEN_EXTRA_ARGS}"
+      echo "_QUARKUS_PROFILE=${_QUARKUS_PROFILE}"
+
+
+# Build the container image and push it to the Container Registry
+# https://cloud.google.com/build/docs/kaniko-cache
+- id: build
+  name: 'gcr.io/kaniko-project/executor:latest'
+  args:
+    - --dockerfile=${_DOCKERFILE}
+    - --destination=eu.gcr.io/${PROJECT_ID}/${_SERVICE}:${COMMIT_SHA}
+    - --cache=true
+    - --cache-ttl=120h
+    - --build-arg=MAVEN_EXTRA_ARGS=${_MAVEN_EXTRA_ARGS}
+    - --build-arg=QUARKUS_PROFILE=${_QUARKUS_PROFILE}
+
+
+substitutions:
+  _SERVICE: "undefined" # define as substitution
+  _DOCKERFILE: "deployment/docker/Dockerfile.native" # default value
+  _QUARKUS_PROFILE: "googlecloud" # default value
+  _MAVEN_EXTRA_ARGS: "-Pgooglecloud" # default value
+
+
+options:
+  # High CPU and RAM resources for native GraalVM build
+  machineType: 'N1_HIGHCPU_8' # 8 vCPUs, 7 GB RAM, local SSD
+  #machineType: 'E2_HIGHCPU_8' # 8 vCPUs, 8 GB RAM, no local SSD

@@ -1,0 +1,42 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: "${SERVICE}"
+spec:
+  template:
+    metadata:
+      annotations:
+        deploy/timestamp: "${TIMESTAMP}"
+        autoscaling.knative.dev/maxScale: "2"
+        autoscaling.knative.dev/minScale: "0"
+        run.googleapis.com/vpc-access-connector: "vpc-connector"
+        run.googleapis.com/cloudsql-instances: "${SQLDB_INSTANCE_CONNECTION_NAME}"
+    spec:
+      timeoutSeconds: "10"
+      containerConcurrency: "50"
+      # serviceAccountName: "example@myproject.iam.gserviceaccount.com"
+      containers:
+        - image: "${IMAGE}"
+          resources:
+            limits:
+              memory: "256M"
+              cpu: "1"
+          env:
+            - name: QUARKUS_PROFILE
+              value: "${QUARKUS_PROFILE}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_MONGODB_CONNECTION_STRING
+              value: "${MONGODB_CONNECTION_STRING}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_MONGODB_PASSWORD
+              value: "${MONGODB_PASSWORD}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_SQLDB_INSTANCE_CONNECTION_NAME
+              value: "${SQLDB_INSTANCE_CONNECTION_NAME}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_SQLDB_INSTANCE_IP
+              value: "${SQLDB_INSTANCE_IP}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_SQLDB_PASSWORD
+              value: "${SQLDB_PASSWORD}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_KAFKA_CLUSTER_BOOTSTRAP_SERVERS
+              value: "${KAFKA_CLUSTER_BOOTSTRAP_SERVERS}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_KAFKA_CLUSTER_API_KEY
+              value: "${KAFKA_CLUSTER_API_KEY}"
+            - name: SERVICE_${SERVICE_UPPERCASE}_KAFKA_CLUSTER_API_SECRET
+              value: "${KAFKA_CLUSTER_API_SECRET}"

@@ -1,0 +1,68 @@
+# Deploy service to Google Cloud Run.
+# Image must be built and pushed to Google Container Registry before.
+
+steps:
+
+# Deploy container image to Cloud Run
+# https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run#gcloud
+# - envsubst replaces placeholders in the yaml files with environment variables.
+# - berglas fetches secrets for environment variables "sm://$PROJECT_ID/..." from GCP Secret Manager
+- id: deploy
+  name: 'eu.gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  #name: 'gcr.io/cloud-builders/gcloud-slim' How to install envsubst here?
+  entrypoint: 'bash' # https://cloud.google.com/build/docs/configuring-builds/run-bash-scripts
+  args:
+    - '-eEuo'
+    - 'pipefail'
+    - '-c'
+    - |-
+      echo "_SERVICE=${_SERVICE}"
+      echo ""
+      echo "PROJECT_ID=${PROJECT_ID}"
+      echo "BRANCH_NAME=${BRANCH_NAME} (Terraform environment)"
+      echo "COMMIT_SHA=${COMMIT_SHA} (Image Tag)"
+      echo ""
+      echo "_KNATIVE_SERVICE_FILE=${_KNATIVE_SERVICE_FILE}"
+      echo "_POLICY_FILE=${_POLICY_FILE}"
+      echo ""
+      echo "_QUARKUS_PROFILE=${_QUARKUS_PROFILE}"
+
+      IMAGE="eu.gcr.io/${PROJECT_ID}/${_SERVICE}:${COMMIT_SHA}"
+      echo "IMAGE=$${IMAGE}"
+
+      # Determine URLs of other services required by this service
+      #SERVICE_REST_HERO_URL=$( gcloud run services describe rest-hero --format 'value(status.url)' )
+      #SERVICE_REST_VILLAIN_URL=$( gcloud run services describe rest-villain --format 'value(status.url)' )
+
+      deployment/gcp/cloudrun-deploy.sh "${PROJECT_ID}" "${BRANCH_NAME}" "${_SERVICE}" "$${IMAGE}" "${_KNATIVE_SERVICE_FILE}" "${_POLICY_FILE}" "${_QUARKUS_PROFILE}"
+
+#  env:
+    #  - 'SERVICE=${_SERVICE}'
+    #  - 'QUARKUS_PROFILE=${_QUARKUS_PROFILE}'
+    #  - 'SERVICE_REST_VILLAIN_MONGODB_CONNECTION_STRING=${_SERVICE_REST_VILLAIN_MONGODB_CONNECTION_STRING}'
+#    - 'SERVICE_REST_VILLAIN_MONGODB_PASSWORD=sm://$PROJECT_ID/service-villain_mongodb-password'
+    #  - 'SERVICE_REST_VILLAIN_SQLDB_INSTANCE_CONNECTION_NAME=${_SERVICE_REST_VILLAIN_SQLDB_INSTANCE_CONNECTION_NAME:-}'
+    #  - 'SERVICE_REST_VILLAIN_SQLDB_INSTANCE_IP=${_SERVICE_REST_VILLAIN_SQLDB_INSTANCE_IP:-}'
+#    - 'SERVICE_REST_VILLAIN_SQLDB_PASSWORD=sm://$PROJECT_ID/service-villain_sqldb-password'
+    #  - 'SERVICE_REST_VILLAIN_KAFKA_CLUSTER_BOOTSTRAP_SERVERS=${_SERVICE_REST_VILLAIN_KAFKA_CLUSTER_BOOTSTRAP_SERVERS:-}'
+    #  - 'SERVICE_REST_VILLAIN_KAFKA_CLUSTER_API_KEY=${_SERVICE_REST_VILLAIN_KAFKA_CLUSTER_API_KEY:-}'
+#    - 'SERVICE_REST_VILLAIN_KAFKA_CLUSTER_API_SECRET=sm://$PROJECT_ID/service-villain_kafka-secret'
+#  secretEnv:
+#  - 'SERVICE_REST_VILLAIN_MONGODB_PASSWORD'
+#  - 'SERVICE_REST_VILLAIN_SQLDB_PASSWORD'
+#  - 'KAFKA_CLUSTER_API_SECRET'
+#
+#availableSecrets:
+#  secretManager:
+#    - versionName: projects/$PROJECT_ID/secrets/service-villain_mongodb-password/versions/latest
+#      env: 'SERVICE_REST_VILLAIN_MONGODB_PASSWORD'
+#    - versionName: projects/$PROJECT_ID/secrets/service-villain_sqldb-password/versions/latest
+#      env: 'SERVICE_REST_VILLAIN_SQLDB_PASSWORD'
+#    - versionName: projects/$PROJECT_ID/secrets/kafka-cluster_api-secret/versions/latest
+#      env: 'SERVICE_REST_VILLAIN_KAFKA_CLUSTER_API_SECRET'
+
+substitutions:
+  _SERVICE: "undefined" # define as substitution
+  _KNATIVE_SERVICE_FILE: "deployment/knative/service.yaml" # default value
+  _POLICY_FILE: "deployment/gcp/policy.yaml" # default value
+  _QUARKUS_PROFILE: "googlecloud" # default value

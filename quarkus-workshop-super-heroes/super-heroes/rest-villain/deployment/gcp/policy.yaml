@@ -1,0 +1,7 @@
+# Allowing public (unauthenticated) access (as with gcloud run deploy --allow-unauthenticated).
+# To apply this policy: gcloud run services set-iam-policy SERVICE policy.yaml
+# https://cloud.google.com/run/docs/authenticating/public#yaml
+bindings:
+  - members:
+      - allUsers
+    role: roles/run.invoker
