@@ -10,7 +10,7 @@ terraform_apply:
   stage: infrastructure_provision
   trigger:
     include:
-      - file: terraform/.gitlab-ci.yml
+      file: infrastructure/.gitlab-ci.yml
   only:
     refs:
       - branches
@@ -22,7 +22,7 @@ service_villain_build:
   stage: services_build
   trigger:
     include:
-      - file: super-heroes/rest-villain/.gitlab-ci.yml
+      file: super-heroes/rest-villain/.gitlab-ci.yml
   variables:
     STAGE: build
   only:
