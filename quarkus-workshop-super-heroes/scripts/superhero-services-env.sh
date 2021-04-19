@@ -11,7 +11,7 @@ function run
 
 (return 0 2>/dev/null) && sourced=1 || sourced=0
 if [[ $sourced == 1 ]]; then
-    run || ( echo "An ERROR occured!"; false )
+    run || ( echo "An ERROR occured! $?"; false )
 else
     echo "Please start this script with source ..."; false
 fi

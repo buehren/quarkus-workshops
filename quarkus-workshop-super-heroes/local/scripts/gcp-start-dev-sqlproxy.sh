@@ -9,7 +9,13 @@
 
 function run
 {
-    ./mvn-all.sh "BUILD JAR" "clean package" "-DskipTests $MAVEN_EXTRA_ARGS"
+    source gcp-env.sh || return
+    source gcp-sql-env.sh || return
+    source kafka-env.sh || return
+
+    source gcp-sql-env-sqlproxy || return
+
+    ./start-dev.sh || return
 }
 
-run || ( echo "An ERROR occured!"; false )
+run || ( echo "An ERROR occured! $?"; false )

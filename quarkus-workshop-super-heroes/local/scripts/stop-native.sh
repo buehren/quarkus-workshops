@@ -30,4 +30,4 @@ function run
     return 0
 }
 
-run || ( echo "An ERROR occured!"; false )
+run || ( echo "An ERROR occured! $?"; false )

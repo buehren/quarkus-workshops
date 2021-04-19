@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Build native binaries with configuration for Google Cloud Platform (GCP)
+
 # Before this, build the UI:
 #     ./build-ui.sh
 
@@ -9,11 +11,11 @@
 
 function run
 {
-    source google-cloudrun-env.sh || return
-    source google-cloudsql-env.sh || return
+    source gcp-env.sh || return
+    source gcp-sql-env.sh || return
     source kafka-env.sh || return
 
-    source build-jars-all.sh || return
+    source build-native.sh || return
 }
 
-run || ( echo "An ERROR occured!"; false )
+run || ( echo "An ERROR occured! $?"; false )
