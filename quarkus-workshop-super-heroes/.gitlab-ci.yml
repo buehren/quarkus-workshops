@@ -9,7 +9,7 @@ stages:
 terraform_apply:
   stage: infrastructure_provision
   trigger:
-    include: infrastructure/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/infrastructure/.gitlab-ci.yml
   only:
     refs:
       - branches
@@ -20,7 +20,7 @@ terraform_apply:
 service_villain_build:
   stage: services_build
   trigger:
-    include: super-heroes/rest-villain/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/.gitlab-ci.yml
   variables:
     STAGE: build
   only:
@@ -34,7 +34,7 @@ service_villain_deploy:
   stage: services_deploy
   needs: [terraform_apply,service_villain_build]
   trigger:
-    include: super-heroes/rest-villain/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/.gitlab-ci.yml
   variables:
     STAGE: deploy
   only:
