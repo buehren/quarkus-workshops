@@ -24,7 +24,7 @@ service_villain_build:
     include:
       - file: super-heroes/rest-villain/.gitlab-ci.yml
   variables:
-    - STAGE: build
+    STAGE: build
   only:
     refs:
       - branches
@@ -34,12 +34,12 @@ service_villain_build:
 
 service_villain_deploy:
   stage: services_deploy
-  needs: [infrastructure_deploy,service_villain_build]
+  needs: [terraform_apply,service_villain_build]
   trigger:
     include:
       - file: super-heroes/rest-villain/.gitlab-ci.yml
   variables:
-    - STAGE: deploy
+    STAGE: deploy
   only:
     refs:
       - branches
