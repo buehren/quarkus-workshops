@@ -36,28 +36,7 @@ function run
     export GCP_SQLDB_INSTANCE_IP
 
 
-    # Set environment variables for accessing GCP Cloud SQL instance
-    # TODO: Combine with deployment/gcp/cloudrun-deploy.sh to read values from Terraform Output / Google Secrets Manager
-
-    export SERVICE_REST_HERO_SQLDB_INSTANCE_CONNECTION_NAME=$GCP_SQLDB_CONNECTION_NAME
-    export SERVICE_REST_HERO_SQLDB_INSTANCE_IP=$GCP_SQLDB_INSTANCE_IP
-    export SERVICE_REST_HERO_SQLDB_PASSWORD=service_hero-password
-
-    export SERVICE_REST_VILLAIN_SQLDB_INSTANCE_CONNECTION_NAME=$GCP_SQLDB_CONNECTION_NAME
-    export SERVICE_REST_VILLAIN_SQLDB_INSTANCE_IP=$GCP_SQLDB_INSTANCE_IP
-    export SERVICE_REST_VILLAIN_SQLDB_PASSWORD=service_villain-password
-
-    export SERVICE_REST_FIGHT_SQLDB_INSTANCE_CONNECTION_NAME=$GCP_SQLDB_CONNECTION_NAME
-    export SERVICE_REST_FIGHT_SQLDB_INSTANCE_IP=$GCP_SQLDB_INSTANCE_IP
-    export SERVICE_REST_FIGHT_SQLDB_PASSWORD=service_fight-password
-
-    export SERVICE_EVENT_STATISTICS_SQLDB_INSTANCE_CONNECTION_NAME=
-    export SERVICE_EVENT_STATISTICS_SQLDB_INSTANCE_IP=
-    export SERVICE_EVENT_STATISTICS_SQLDB_PASSWORD=
-
-    env | egrep "SERVICE_.*_SQLDB_.*" | sed "s/PWD=.*/PWD=.../" | sort
-
-    echo "Environment variables set successfully."
+    echo "GCP Cloud SQL Environment variables set successfully."
 }
 
 (return 0 2>/dev/null) && sourced=1 || sourced=0

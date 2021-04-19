@@ -44,7 +44,7 @@ function run
     # Enable Cloud Resource Manager API (required for enabling APIs) and Secret Manager API
     gcloud --project "$GCP_PROJECT_ID" \
         services enable \
-            cloudresourcemanager.googleapis.com \t
+            cloudresourcemanager.googleapis.com \
             secretmanager.googleapis.com \
         || return 131
     echo ""
@@ -108,8 +108,7 @@ function run
 #    echo "GCLOUD_SERVICEACCOUNT_FIREBASE_CREDENTIALS_FILE=GCLOUD_SERVICEACCOUNT_FIREBASE_CREDENTIALS_FILE"
 
 
-
-    echo "Environment variables set successfully."
+    echo "GCP environment variables set successfully."
 }
 
 #set +e

@@ -15,7 +15,7 @@ function run
     shift 3
     roles=( "$@" )
 
-    DIR=$( dirname ${BASH_SOURCE[0]} )
+    DIR=$( dirname "${BASH_SOURCE[0]}" )
 
     echo "project_id=$project_id"
     echo "account_name=$account_name"

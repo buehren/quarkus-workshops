@@ -7,6 +7,7 @@ function run
         export SUPERHERO_SERVICES=$SUPERHERO_SERVICES_ALL
     fi
     env | grep SUPERHERO_SERVICES | sort
+    echo ""
 }
 
 (return 0 2>/dev/null) && sourced=1 || sourced=0

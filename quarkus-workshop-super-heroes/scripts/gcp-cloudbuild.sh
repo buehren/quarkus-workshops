@@ -12,7 +12,7 @@
 #     build service(s) as native binaries, build and push container images, deploy services to Cloud Run
 # - first parameter:
 #     build: build service(s), build and push container images
-#     deploy: deploy services to Cloud Run - images must be built before, set COMMIT_SHA=... to the image tag to use
+#     deploy: deploy services to Cloud Run - images must be built before, set IMAGE_TAG=... to the image tag to use
 #     "": both
 # - second parameter:
 #     native: build/deploy native services
@@ -21,18 +21,18 @@
 
 function run
 {
-    target="$1"
+    DIR=$( dirname "${BASH_SOURCE[0]}" )
+
+    local target="$1"
     DOCKERFILE_TYPE="${2:-native}"  # If parameter not set or null, use native. See build-docker.sh for options!
 
     # Set required variables if not available as environment variables
-    BRANCH_NAME="${BRANCH_NAME:-dev}"
-    COMMIT_SHA="${COMMIT_SHA:-manualbuild_$( date +"%Y-%m-%d_%H-%M-%S" )}"
+    TERRAFORM_ENVIRONMENT="${TERRAFORM_ENVIRONMENT:-dev}"
+    IMAGE_TAG="${IMAGE_TAG:-manualbuild_$( date +"%Y-%m-%d_%H-%M-%S" )}"
 
-    source superhero-services-env.sh || return
-#    source gcp-env.sh || return
-#    source gcp-sql-env.sh || return
-#    source kafka-env.sh || return
 
+    source "$DIR"/services-env.sh || return
+    source "$DIR"/gcp-env.sh || return
 
     if [[ "$target" == "" || $target == "build" ]]; then
         run_inner build || return
@@ -45,7 +45,9 @@ function run
 
 function run_inner
 {
-    target_inner="$1"
+    local target_inner="$1"
+
+    cd "$DIR/../super-heroes/"  || return 100
 
     for service in $SUPERHERO_SERVICES; do
         echo "======================================= $target_inner: $service ($DOCKERFILE_TYPE) ======================================= " && \
@@ -61,7 +63,9 @@ function run_inner
         cd "$service"  || return 102
 
         # Call cloudbuild script of current service
-        deployment/gcp/cloudbuild-"$target_inner".sh
+        TERRAFORM_ENVIRONMENT="${TERRAFORM_ENVIRONMENT}" \
+        IMAGE_TAG="${IMAGE_TAG}" \
+        deployment/gcp/cloudbuild-"$target_inner".sh || return 103
 
         # Service name used in environment variables (upcase and "_" instead of "-")
         SERVICE=${service^^}
@@ -89,8 +93,8 @@ function run_inner
 
 #        substitutions=(
 #            "_SERVICE=${service},"
-#            "BRANCH_NAME=${BRANCH_NAME},"
-#            "COMMIT_SHA=${COMMIT_SHA},"
+#            "BRANCH_NAME=${TERRAFORM_ENVIRONMENT},"
+#            "COMMIT_SHA=${IMAGE_TAG},"
 #        )
 #
 #        if [[ "$target_inner" == "build" ]]; then
@@ -152,7 +156,7 @@ concat () (
 
 #    DOCKERFILE_TYPE="${1:-native}"  # If parameter not set or null, use native. See build-docker.sh for options!
 #
-#    source superhero-services-env.sh || return
+#    source services-env.sh || return
 #    source gcp-env.sh || return
 #    source gcp-sql-env.sh || return
 #    source kafka-env.sh || return
