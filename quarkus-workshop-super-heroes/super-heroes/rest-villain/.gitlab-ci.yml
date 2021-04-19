@@ -1,0 +1,31 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+.gcp:
+  image: google/cloud-sdk
+  services:
+    - docker:dind
+  script:
+    #- gcloud auth activate-service-account --key-file <(echo -n "${GCP_SERVICEACCOUNT_KEY}" | base64 -d )
+    - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEY
+    - deployment/gcp/cloudbuild-$CI_JOB_STAGE.sh
+  variables:
+    TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH
+    IMAGE_TAG: $CI_COMMIT_SHA
+
+service_build:
+  stage: build
+  extends:
+    - .gcp
+  rules:
+    - if: $STAGE == "build" || $STAGE == ""
+
+service_deploy:
+  stage: deploy
+  extends:
+    - .gcp
+  rules:
+    - if: $STAGE == "deploy" || $STAGE == ""
