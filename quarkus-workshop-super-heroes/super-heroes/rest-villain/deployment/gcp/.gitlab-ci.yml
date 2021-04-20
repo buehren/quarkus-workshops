@@ -4,32 +4,40 @@ stages:
   - build
   - deploy
 
-.gcp:
+.gcp-base:
   image: google/cloud-sdk:slim
   services:
     - docker:dind
+  variables:
+    TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH
+    IMAGE_TAG: $CI_COMMIT_SHA
   script:
     #- gcloud auth activate-service-account --key-file <(echo -n "${GCP_SERVICEACCOUNT_KEY}" | base64 -d )
     - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEYFILE
     - cd quarkus-workshop-super-heroes/super-heroes/rest-villain/
     - deployment/gcp/cloudbuild-$CI_JOB_STAGE.sh
-  variables:
-    TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH
-    IMAGE_TAG: $CI_COMMIT_SHA
-
-build:
-  stage: build
-  extends:
-    - .gcp
-  rules:
-    - if: $TARGET == "build" || $TARGET == ""
-
-deploy:
-  stage: deploy
-  extends:
-    - .gcp
-  rules:
-    - if: $TARGET == "deploy" || $TARGET == ""
-    - if: $GCP_PROJECT_ID
   environment:
     name: $CI_COMMIT_BRANCH
+  only:
+    variables:
+      - $GCP_PROJECT_ID
+      - $GCP_SERVICEACCOUNT_KEYFILE
+      - $GCP_BUCKET_CLOUDBUILD_LOG
+      - $GCP_BUCKET_CLOUDBUILD_SOURCE
+      - $GCP_REGION
+
+build service:
+  stage: build
+  extends:
+    - .gcp-base
+  only:
+    variables:
+      - $TARGET == "build" || $TARGET == ""
+
+deploy service:
+  stage: deploy
+  extends:
+    - .gcp-base
+  only:
+    variables:
+      - $TARGET == "deploy" || $TARGET == ""
