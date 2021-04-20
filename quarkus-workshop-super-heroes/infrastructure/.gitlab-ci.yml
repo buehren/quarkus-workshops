@@ -15,3 +15,7 @@ terraform:
     - ./cloudbuild.sh
   variables:
     TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH
+  rules:
+    - if: $GCP_PROJECT_ID
+  environment:
+    name: $CI_COMMIT_BRANCH

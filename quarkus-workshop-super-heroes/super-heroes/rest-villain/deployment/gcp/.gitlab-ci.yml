@@ -30,3 +30,6 @@ deploy:
     - .gcp
   rules:
     - if: $TARGET == "deploy" || $TARGET == ""
+    - if: $GCP_PROJECT_ID
+  environment:
+    name: $CI_COMMIT_BRANCH
