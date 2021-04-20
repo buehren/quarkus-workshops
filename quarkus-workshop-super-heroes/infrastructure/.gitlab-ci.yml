@@ -1,6 +1,10 @@
 image: docker:latest
 
+stages:
+  - provision
+
 terraform:
+  stage: provision
   image: google/cloud-sdk:slim
   services:
     - docker:dind
@@ -9,3 +13,5 @@ terraform:
     - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEYFILE
     - cd quarkus-workshop-super-heroes/infrastructure/
     - ./cloudbuild.sh
+  variables:
+    TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH

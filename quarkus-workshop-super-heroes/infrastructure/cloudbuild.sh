@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "GCP_PROJECT_ID=${GCP_PROJECT_ID}"
+echo "GCP_BUCKET_CLOUDBUILD=${GCP_BUCKET_CLOUDBUILD}"
+echo "TERRAFORM_ENVIRONMENT=${TERRAFORM_ENVIRONMENT}"
+
 time gcloud \
     builds submit \
     --project="${GCP_PROJECT_ID}" \
