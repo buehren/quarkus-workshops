@@ -36,7 +36,8 @@ function run
     export GCP_SQLDB_INSTANCE_IP
 
 
-    echo "GCP Cloud SQL Environment variables set successfully."
+    echo "GCP Cloud SQL Environment variables set."
+    echo ""
 }
 
 (return 0 2>/dev/null) && sourced=1 || sourced=0

@@ -22,25 +22,25 @@ function run
     echo "credentials_file=$credentials_file"
     echo "roles=${roles[*]}"
 
-    account_email="$account_name@$project_id.iam.gserviceaccount.com"
-    echo "account_email=$account_email"
+    export GCP_ACCOUNT_EMAIL="$account_name@$project_id.iam.gserviceaccount.com"
+    echo "GCP_ACCOUNT_EMAIL=$GCP_ACCOUNT_EMAIL"
 
     account_exists=$( \
         gcloud iam service-accounts list \
             --project "$project_id" \
             --format="table[no-heading](email)" \
-            --filter="email:$account_email" \
+            --filter="email:$GCP_ACCOUNT_EMAIL" \
         | wc -l \
     ) || return
     echo "account_exists=$account_exists"
 
     if [[ "$account_exists" != "1" ]]; then
         gcloud iam service-accounts create --project "$project_id" "$account_name" || return
-        gcloud iam service-accounts describe "$account_email" || return
+        gcloud iam service-accounts describe "$GCP_ACCOUNT_EMAIL" || return
     fi
 
-    $DIR/gcp-iam-roles.sh "$project_id" "$account_email" "${roles[@]}" || return
-    $DIR/gcp-iam-credentials.sh "$account_email" "$credentials_file" || return
+    $DIR/gcp-iam-roles.sh "$project_id" "$GCP_ACCOUNT_EMAIL" "${roles[@]}" || return
+    $DIR/gcp-iam-credentials.sh "$GCP_ACCOUNT_EMAIL" "$credentials_file" || return
 }
 
 run "$@" || ( echo "An ERROR occured! $?"; false )

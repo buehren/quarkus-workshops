@@ -6,20 +6,25 @@
 
 function run
 {
+    local DIR=$( dirname "${BASH_SOURCE[0]}" )
+
     # Google Cloud Platform
 
-    source ./gcp-env.sh || return 101
+    source "$DIR"/gcp-env.sh || return 101
 
     gcp_account_name="gitlab-ci"
     gcp_credentials_file="$HOME/.config/gcp/key-serviceaccount-gitlabci-$GCP_PROJECT_ID.json"
 
     # Create service account and credentials file for GitLab CI (if required)
-    ./gcp-iam-serviceaccount.sh \
+    source "$DIR"/gcp-iam-serviceaccount.sh \
         "$GCP_PROJECT_ID" \
         "$gcp_account_name" \
         "$gcp_credentials_file" \
             "roles/cloudbuild.builds.editor" \
         || return 111
+
+    # Allow GitLab to write to Storage Bucket for uploading sources to Cloud Build
+    gsutil iam ch "serviceAccount:${GCP_ACCOUNT_EMAIL}:objectCreator" "gs://${GCP_BUCKET_CLOUDBUILD}" || return 112
 
     echo "========================================================================================="
     echo "GitLab CI/CD variables:"
@@ -32,9 +37,8 @@ function run
     echo "========================================================================================="
     \rm -vf $gcp_credentials_file
 
-    account_email="$gcp_account_name@$GCP_PROJECT_ID.iam.gserviceaccount.com"
-    gcloud iam service-accounts keys list --iam-account="$account_email"
-    echo "Delete unused keys: gcloud iam service-accounts keys delete --iam-account=$account_email  KEY_ID"
+    gcloud iam service-accounts keys list --iam-account="${GCP_ACCOUNT_EMAIL}"
+    echo "Delete unused keys: gcloud iam service-accounts keys delete --iam-account=${GCP_ACCOUNT_EMAIL}  KEY_ID"
 }
 
 run "$@" || ( echo "An ERROR occured! $?"; false )

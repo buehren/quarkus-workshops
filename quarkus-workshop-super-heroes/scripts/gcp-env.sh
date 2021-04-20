@@ -55,7 +55,7 @@ function run
     export GCP_BUCKET_CLOUDBUILD="$GCP_PROJECT_ID"_cloudbuild_source
     echo "GCP_BUCKET_CLOUDBUILD=$GCP_BUCKET_CLOUDBUILD, location=$GCP_BUCKETS_LOCATION"
     if ! gsutil ls "gs://$GCP_BUCKET_CLOUDBUILD"; then
-        gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://$GCP_BUCKET_CLOUDBUILD"  || return 121
+        gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://{$GCP_BUCKET_CLOUDBUILD}"  || return 121
     fi
     echo ""
 
@@ -108,7 +108,8 @@ function run
 #    echo "GCLOUD_SERVICEACCOUNT_FIREBASE_CREDENTIALS_FILE=GCLOUD_SERVICEACCOUNT_FIREBASE_CREDENTIALS_FILE"
 
 
-    echo "GCP environment variables set successfully."
+    echo "GCP environment variables set."
+    echo ""
 }
 
 #set +e
