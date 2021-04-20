@@ -107,7 +107,7 @@ function run_inner
 #            builds submit \
 #            --project="${GCP_PROJECT_ID}" \
 #            --region="${GCP_REGION}" \
-#            --gcs-source-staging-dir="gs://${GCP_BUCKET_CLOUDBUILD}/source" \
+#            --gcs-source-staging-dir="gs://${GCP_BUCKET_CLOUDBUILD_SOURCE}/source" \
 #            --config="deployment/gcp/cloudbuild-${target_inner}.yaml" \
 #            --ignore-file="deployment/gcp/.gcloudignore.${DOCKERFILE_TYPE}" \
 #            --substitutions=$( concat "${substitutions[@]}" ) \

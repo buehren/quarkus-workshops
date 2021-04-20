@@ -52,10 +52,23 @@ function run
 
     # Create Google Cloud Storage Bucket for uploading sources to Cloud Build
 
-    export GCP_BUCKET_CLOUDBUILD="$GCP_PROJECT_ID"_cloudbuild_source
-    echo "GCP_BUCKET_CLOUDBUILD=$GCP_BUCKET_CLOUDBUILD, location=$GCP_BUCKETS_LOCATION"
-    if ! gsutil ls "gs://$GCP_BUCKET_CLOUDBUILD"; then
-        gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://{$GCP_BUCKET_CLOUDBUILD}"  || return 121
+    export GCP_BUCKET_CLOUDBUILD_SOURCE="$GCP_PROJECT_ID"_cloudbuild_source
+    echo "GCP_BUCKET_CLOUDBUILD_SOURCE=$GCP_BUCKET_CLOUDBUILD_SOURCE, location=$GCP_BUCKETS_LOCATION"
+    if ! gsutil ls "gs://$GCP_BUCKET_CLOUDBUILD_SOURCE"; then
+        gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://${GCP_BUCKET_CLOUDBUILD_SOURCE}"  || return 121
+    fi
+    echo ""
+
+    # Create Google Cloud Storage Bucket for Cloud Build logs.
+    # Required because of this issue when triggering Cloud Build from GitLab CI:
+    # the default logs bucket is always outside any VPC-SC security perimeter, so this tool cannot stream the logs for you.
+    # If you want your logs saved inside your VPC-SC perimeter, use your own bucket.
+    # See https://cloud.google.com/build/docs/securing-builds/store-manage-build-logs
+
+    export GCP_BUCKET_CLOUDBUILD_LOG="$GCP_PROJECT_ID"_cloudbuild_log
+    echo "GCP_BUCKET_CLOUDBUILD_LOG=$GCP_BUCKET_CLOUDBUILD_LOG, location=$GCP_BUCKETS_LOCATION"
+    if ! gsutil ls "gs://${GCP_BUCKET_CLOUDBUILD_LOG}"; then
+        gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://${GCP_BUCKET_CLOUDBUILD_LOG}"  || return 121
     fi
     echo ""
 
