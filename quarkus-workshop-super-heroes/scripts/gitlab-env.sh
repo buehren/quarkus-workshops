@@ -24,7 +24,7 @@ function run
         || return 111
 
     # Allow GitLab to write to Storage Bucket for uploading sources to Cloud Build
-    gsutil iam ch "serviceAccount:${GCP_ACCOUNT_EMAIL}:objectCreator" "gs://${GCP_BUCKET_CLOUDBUILD}" || return 112
+    gsutil iam ch "serviceAccount:${GCP_ACCOUNT_EMAIL}:roles/storage.admin" "gs://${GCP_BUCKET_CLOUDBUILD}" || return 112
 
     echo "========================================================================================="
     echo "GitLab CI/CD variables:"
