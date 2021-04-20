@@ -29,13 +29,14 @@ function run
     echo "========================================================================================="
     echo "GitLab CI/CD variables:"
     echo ""
-    echo "GCP_REGION: Value: $GCP_REGION"
-    echo "GCP_PROJECT_ID: Protected, Environment scope (dev/staging/prod), Value: $GCP_PROJECT_ID"
-    echo "GCP_BUCKET_CLOUDBUILD_SOURCE: Protected, Environment scope (dev/staging/prod), Value: $GCP_BUCKET_CLOUDBUILD_SOURCE"
+    echo "GCP_REGION: Value: ${GCP_REGION}"
+    echo "GCP_PROJECT_ID: Protected, Environment scope (dev/staging/prod), Value: ${GCP_PROJECT_ID}"
+    echo "GCP_BUCKET_CLOUDBUILD_SOURCE: Protected, Environment scope (dev/staging/prod), Value: ${GCP_BUCKET_CLOUDBUILD_SOURCE}"
+    echo "GCP_BUCKET_CLOUDBUILD_LOG: Protected, Environment scope (dev/staging/prod), Value: ${GCP_BUCKET_CLOUDBUILD_LOG}"
     echo "GCP_SERVICEACCOUNT_KEYFILE: File, Protected, Masked, Environment scope (dev/staging/prod), Value:"
     cat "${gcp_credentials_file}"
     echo "========================================================================================="
-    \rm -vf $gcp_credentials_file
+    \rm -vf "${gcp_credentials_file}"
 
     gcloud iam service-accounts keys list --iam-account="${GCP_ACCOUNT_EMAIL}"
     echo "Delete unused keys: gcloud iam service-accounts keys delete --iam-account=${GCP_ACCOUNT_EMAIL}  KEY_ID"
