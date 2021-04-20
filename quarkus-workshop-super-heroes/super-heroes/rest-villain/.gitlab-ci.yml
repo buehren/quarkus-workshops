@@ -5,7 +5,7 @@ stages:
   - deploy
 
 .gcp:
-  image: google/cloud-sdk
+  image: google/cloud-sdk:slim
   services:
     - docker:dind
   script:

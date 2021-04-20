@@ -1,7 +1,7 @@
 image: docker:latest
 
 terraform:
-  image: google/cloud-sdk
+  image: google/cloud-sdk:slim
   services:
     - docker:dind
   script:
