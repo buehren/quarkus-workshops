@@ -24,7 +24,8 @@ function run
 
     env | egrep "KAFKA_CLUSTER|CONFLUENT_CLOUD" | sed "s/SECRET=.*/SECRET=.../" | sed "s/PASSWORD=.*/PASSWORD=.../" | sort
 
-    echo "Environment variables set successfully."
+    echo "Kafka environment variables set."
+    echo ""
 }
 
 (return 0 2>/dev/null) && sourced=1 || sourced=0
