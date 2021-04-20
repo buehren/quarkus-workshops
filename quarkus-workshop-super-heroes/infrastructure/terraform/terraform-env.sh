@@ -75,7 +75,7 @@ function run
 
     # Create Google Cloud Storage Bucket for saving the Terraform state
 
-    GCLOUD_BUCKET_TERRAFORM="${GCP_PROJECT_ID}_${TERRAFORM_ENVIRONMENT}_terraform"
+    GCLOUD_BUCKET_TERRAFORM="${GCP_PROJECT_ID}_terraform"
     echo "GCLOUD_BUCKET_TERRAFORM=$GCLOUD_BUCKET_TERRAFORM, location=$GCP_BUCKETS_LOCATION"
     if ! gsutil ls "gs://$GCLOUD_BUCKET_TERRAFORM"; then
         gsutil mb -p "$GCP_PROJECT_ID" -l "$GCP_BUCKETS_LOCATION" "gs://$GCLOUD_BUCKET_TERRAFORM"  || return 121

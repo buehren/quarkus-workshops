@@ -62,7 +62,7 @@ function run
     # Read environment variables from Terraform output
     # (existing environment variables are not overwritten!)
 
-    TERRAFORM_OUTPUTS_GS_URL="gs://${PROJECT_ID}_${TERRAFORM_ENVIRONMENT}_terraform/${TERRAFORM_ENVIRONMENT}/terraform/state/default.tfstate.output.json"
+    TERRAFORM_OUTPUTS_GS_URL="gs://${PROJECT_ID}_terraform/${TERRAFORM_ENVIRONMENT}/terraform/state/default.tfstate.output.json"
     echo "Terraform Outputs URL: ${TERRAFORM_OUTPUTS_GS_URL}"
 
     TERRAFORM_OUTPUTS_JSON=$( gsutil cp "${TERRAFORM_OUTPUTS_GS_URL}" - ) || return 111

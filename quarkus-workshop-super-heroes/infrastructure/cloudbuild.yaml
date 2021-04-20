@@ -111,7 +111,7 @@ steps:
       - |-
         if [ -d "terraform/environments/$BRANCH_NAME/" ]; then
             if [[ -f /workspace/default.tfstate.output.json ]]; then
-                gsutil cp /workspace/default.tfstate.output.json gs://${PROJECT_ID}_${BRANCH_NAME}_terraform/${BRANCH_NAME}/terraform/state/
+                gsutil cp /workspace/default.tfstate.output.json gs://${PROJECT_ID}_terraform/${BRANCH_NAME}/terraform/state/
             else
                 echo "Error: default.tfstate.output.json should exist for branch '$BRANCH_NAME'"
                 exit 1
