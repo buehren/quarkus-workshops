@@ -32,7 +32,7 @@ infrastructure:
 build villain service:
   stage: one
   trigger:
-    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
   variables:
     TARGET: build
@@ -49,7 +49,7 @@ deploy villain service:
     - build villain service
     - infrastructure
   trigger:
-    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
   variables:
     TARGET: deploy
