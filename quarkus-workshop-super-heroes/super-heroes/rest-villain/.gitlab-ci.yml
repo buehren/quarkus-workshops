@@ -17,16 +17,16 @@ stages:
     TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH
     IMAGE_TAG: $CI_COMMIT_SHA
 
-service_build:
+build:
   stage: build
   extends:
     - .gcp
   rules:
-    - if: $STAGE == "build" || $STAGE == ""
+    - if: $TARGET == "build" || $TARGET == ""
 
-service_deploy:
+deploy:
   stage: deploy
   extends:
     - .gcp
   rules:
-    - if: $STAGE == "deploy" || $STAGE == ""
+    - if: $TARGET == "deploy" || $TARGET == ""

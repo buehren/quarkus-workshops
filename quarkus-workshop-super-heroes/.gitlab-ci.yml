@@ -1,13 +1,25 @@
 # Run gitlab-env.sh to print variables required in GitLab CI.
 
-stages:
-  - infrastructure_provision
-  - services_build
-  - services_deploy
+# This GitLab CI pipeline triggers Google Cloud Build on changes:
+# - Provisioning of infrastructure
+# - Building of services
+# - Deployment of services
+#
+# Triggering the builds is required because the GitLab repository is not available on the Internet
+# so that we cannot add triggers to Google Cloud Build.
+#
+# The actual workflow steps should be implemented in scripts to avoid a strong dependency on Google Cloud Build.
+
+image: alpine
+
+#stages:
+#  - provision infrastructure
+#  - build services
+#  - deploy services
 
 
-terraform_apply:
-  stage: infrastructure_provision
+infrastructure:
+  #stage: provision infrastructure
   trigger:
     include: /quarkus-workshop-super-heroes/infrastructure/.gitlab-ci.yml
     strategy: depend
@@ -15,37 +27,39 @@ terraform_apply:
     refs:
       - branches
     changes:
-      - infrastructure/
+      - /quarkus-workshop-super-heroes/infrastructure/
 
 
-service_villain_build:
-  stage: services_build
+build villain service:
+  #stage: build services
   trigger:
     include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/.gitlab-ci.yml
     strategy: depend
   variables:
-    STAGE: build
+    TARGET: build
   only:
     refs:
       - branches
     changes:
-      - super-heroes/rest-villain/
+      - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
 
 
-service_villain_deploy:
-  stage: services_deploy
-  needs: [terraform_apply,service_villain_build]
+deploy villain service:
+  #stage: deploy services
+  needs:
+    - build villain service
+    - infrastructure
   trigger:
     include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/.gitlab-ci.yml
     strategy: depend
   variables:
-    STAGE: deploy
+    TARGET: deploy
   only:
     refs:
       - branches
     changes:
-      - super-heroes/rest-villain/
-      - infrastructure/
+      - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
+      - /quarkus-workshop-super-heroes/infrastructure/
 
 
 # https://docs.gitlab.com/ee/ci/environments
