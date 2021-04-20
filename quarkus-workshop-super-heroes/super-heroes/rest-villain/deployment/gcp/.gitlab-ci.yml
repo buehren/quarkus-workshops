@@ -4,6 +4,7 @@ stages:
   - build
   - deploy
 
+
 .gcp-base:
   image: google/cloud-sdk:slim
   services:
@@ -11,13 +12,15 @@ stages:
   variables:
     TERRAFORM_ENVIRONMENT: $CI_COMMIT_BRANCH
     IMAGE_TAG: $CI_COMMIT_SHA
-  script:
+  before_script:
     #- gcloud auth activate-service-account --key-file <(echo -n "${GCP_SERVICEACCOUNT_KEY}" | base64 -d )
     - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEYFILE
+  script:
     - cd quarkus-workshop-super-heroes/super-heroes/rest-villain/
     - deployment/gcp/cloudbuild-$CI_JOB_STAGE.sh
   environment:
     name: $CI_COMMIT_BRANCH
+    action: prepare # allows running multiple jobs in parallel for the same environment
   only:
     variables:
       - $GCP_PROJECT_ID
@@ -26,6 +29,7 @@ stages:
       - $GCP_BUCKET_CLOUDBUILD_SOURCE
       - $GCP_REGION
 
+
 build service:
   stage: build
   extends:
@@ -33,6 +37,7 @@ build service:
   only:
     variables:
       - $TARGET == "build" || $TARGET == ""
+
 
 deploy service:
   stage: deploy

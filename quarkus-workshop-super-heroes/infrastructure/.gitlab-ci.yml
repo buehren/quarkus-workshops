@@ -8,9 +8,10 @@ terraform:
   image: google/cloud-sdk:slim
   services:
     - docker:dind
-  script:
+  before_script:
     #- gcloud auth activate-service-account --key-file <(echo -n "${GCP_SERVICEACCOUNT_KEY}" | base64 -d )
     - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEYFILE
+  script:
     - cd quarkus-workshop-super-heroes/infrastructure/
     - ./cloudbuild.sh
   variables:
@@ -19,3 +20,4 @@ terraform:
     - if: $GCP_PROJECT_ID
   environment:
     name: $CI_COMMIT_BRANCH
+  resource_group: infrastructure
