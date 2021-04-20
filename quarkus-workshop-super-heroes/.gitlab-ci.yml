@@ -13,12 +13,12 @@
 image: alpine
 
 stages:
-  - one
-  - two
+  - prepare
+  - deploy services
 
 
 infrastructure:
-  stage: one
+  stage: prepare
   trigger:
     include: /quarkus-workshop-super-heroes/infrastructure/.gitlab-ci.yml
     strategy: depend
@@ -30,7 +30,7 @@ infrastructure:
 
 
 build villain service:
-  stage: one
+  stage: prepare
   trigger:
     include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
@@ -44,7 +44,7 @@ build villain service:
 
 
 deploy villain service:
-  stage: two
+  stage: deploy services
   needs:
     - build villain service
     - infrastructure
