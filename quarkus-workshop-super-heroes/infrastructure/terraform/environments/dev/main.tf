@@ -1,6 +1,6 @@
 terraform {
     backend "gcs" {
-        bucket  = "my-microservices-playground-2_dev_terraform"
+        bucket  = "my-microservices-playground-2_terraform"
         prefix  = "dev/terraform/state"
     }
 }
