@@ -4,8 +4,8 @@
 // ====================================
 
 = image:arc42-logo.png[arc42] Template
-// toc-title definition MUST follow document title without blank line!
-:toc-title: Table of Contents
+:toc: macro
+:toclevels: 10
 
 //additional style for arc42 help callouts
 ifdef::backend-html5[]
@@ -41,6 +41,13 @@ For documentation of your own system you use better the _plain_ version.
 ====
 ****
 
+
+:toc: macro
+:toc-title:
+
+<<<<
+== Table of Contents
+toc::[]
 
 // numbering from here on
 :numbered:
