@@ -17,6 +17,8 @@ stages:
     - gcloud auth activate-service-account --key-file $GCP_SERVICEACCOUNT_KEYFILE
   script:
     - echo "CI_CONFIG_PATH=${CI_CONFIG_PATH}"
+    - env
+    - export
     - cd quarkus-workshop-super-heroes/super-heroes/rest-villain/
     - deployment/gcp/cloudbuild-$CI_JOB_STAGE.sh
   environment:

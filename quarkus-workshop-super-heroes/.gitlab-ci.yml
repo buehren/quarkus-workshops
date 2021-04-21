@@ -17,9 +17,11 @@ stages:
   - deploy services
 
 print path:
-  stage_ prepare
+  stage: prepare
   script:
     - echo "CI_CONFIG_PATH=${CI_CONFIG_PATH}"
+    - env
+    - export
 
 infrastructure:
   stage: prepare
