@@ -46,7 +46,6 @@ build villain service:
     changes:
       - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
 
-
 deploy villain service:
   stage: deploy services
   needs:
@@ -55,7 +54,7 @@ deploy villain service:
   variables:
     TARGET: deploy
     SERVICE_NAME: rest-villain
-    SERVICE_DIR: /quarkus-workshop-super-heroes/super-heroes/$SERVICE_NAME
+    SERVICE_DIR: quarkus-workshop-super-heroes/super-heroes/$SERVICE_NAME
   trigger:
     include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
