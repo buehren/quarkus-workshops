@@ -95,6 +95,11 @@ function run
     echo "Done loading environment variables from Terraform State."
 
 
+    # TODO: Determine URLs of other services required by this service
+    #SERVICE_REST_HERO_URL=$( gcloud run services describe rest-hero --format 'value(status.url)' )
+    #SERVICE_REST_VILLAIN_URL=$( gcloud run services describe rest-villain --format 'value(status.url)' )
+
+
     # Output environment variables and service configuration
     export
 
