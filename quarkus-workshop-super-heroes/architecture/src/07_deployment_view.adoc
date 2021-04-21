@@ -84,3 +84,82 @@ _<diagram + explanation>_
 ==== _<Infrastructure Element n>_
 
 _<diagram + explanation>_
+
+
+=== Cloud Infrastructure
+
+==== Cloud Services
+
+These are the main Cloud Services for operating this application:
+
+Google Cloud Run:: _Google Cloud Run_ provides <<glossary-serverless,Serverless>> operation of <<glossary-container,Containers>>. It can automatically scale up and down (to zero) depending on traffic. Cloud Run only charges for the used resources. +
++
+It follows the <<glossary-knative,Knative>> standard so that the services and their configuration can also be used in custom <<glossary-kubernetes,Kubernetes>> clusters in the Cloud or on-premise. +
++
+For each deployment of a service, a new revision is created. Traffic can be re-routed to another revision or be split between new and old revisions to test changes in production with limited impact.
++
+The services' Container images have to be build in advance and pushed to _Google Container Registry_ where _Google Cloud Run_ retrieves them.
+
+Google Container Registry:: Container Registry is Google's place to store and manage Container images.
+
+Google Cloud Storage:: _Google Cloud Storage_ provides object (file) storage in so-called buckets. The stored objects can be accessed by other services or web browsers via APIs and HTTP requests. Each bucket can be configured for public or private access.
+
+Google Secret Manager:: Secret Manager is a secure storage system for API keys, passwords, certificates, and other sensitive data. It provides a central place and single source of truth to manage, access, and audit secrets across Google Cloud. Data is encrypted in transit with TLS and at rest with AES-256-bit encryption keys.
+
+Google Identity and Access Management (IAM):: User and Service Accounts, and their permissions are managed by _Google IAM_. Access to Cloud resources (like projects or storage buckets) and services (like _Google Cloud Build_ or _Google Cloud Run_) is only granted to users or services with the required permissions.
+
+Google Virtual Private Cloud (VPC):: A virtual private cloud (VPC) is an on-demand configurable pool of shared resources allocated within a public cloud environment, providing a certain level of isolation between the different organizations using the resources. Google Cloud Platform resources can be provisioned, connected, and isolated in a virtual private cloud (VPC) across all GCP regions. Identity management policies and security rules allow for private access. https://en.wikipedia.org/wiki/Virtual_private_cloud[Quelle^]
+
+Google Cloud SQL:: Fully managed relational database service for MySQL, PostgreSQL, and SQL Server.
+
+MongoDB Atlas:: Fully managed document-oriented database service for MongoDB. It provides auto-scaling and distributed storage, even across multiple Cloud providers (Google Cloud Platform, Amazon Web Services, Microsoft Azure).
+
+Confluent Cloud:: Fully managed event streaming service for Apache Kafka.
+
+
+==== Infrastructure Provisioning and Services Deployment
+
+The Cloud infrastructure required to run this application is defined as <<glossary-iac,Infrastructure as Code (IaC)>> in <<glossary-terraform,_Terraform_>> configuration files. _Terraform providers_ connect to the APIs of Cloud services and provision the infrastructure resources as defined. _Terraform_ also keeps a state of the resources including their IDs so that it can deploy configuration changes by modifying or replacing existing resources.
+
+A <<glossary-gitops,GitOps>> workflow has been established by using a <<glossary-git,Git>> repository as the single source of truth for infrastructure definitions and automating the provisioning of infrastructure in a Continuous Integration and Deployment (<<glossary-continuous-integration,CI>>/<<glossary-continuous-deployment,CD>>) process.
+
+This enables the creation of development and staging environments that match the production environment. Not only software changes can be tested in these environments before being deployed to production but also changes to the infrastructure.
+
+
+.Cloud Provisioning and Deployment Workflow - Information Flow Diagram
+image::../diagrams/svg/Cloud%20Deployment%20Information%20Flow.svg[Cloud Deployment - Information Flow Diagram]
+
+
+Environments:: Each environment (development, staging, production etc.) is created in its own projects in _Google Cloud Platform_, _MongoDB Atlas_, and _Confluent Cloud_. This provides a separation of the resources and permissions to avoid accidental modifications of or access to other environments. +
++
+The environments and administration permissions are currently created manually. It would be possible to add another _Terraform_ configuration regarding the environments if it should be required to create new environments frequently.
+
+Bootstrap Scripts:: Bootstrap Scripts are run manually to prepare some basic resources in new environments required for running the GitOps workflow:
+* Buckets for storing the _Terraform_ state and the source files for _Google Cloud Build_ are created in _Google Cloud Storage_.
+* Secrets required by Terraform to access MongoDB Atlas and Confluent Cloud are stored in _Google Secret Manager_. These secrets have to be retrieved from the Cloud providers manually by creating service accounts. The bootstrap scripts contain hints for doing that.
+* Service accounts and required permissions for _Terraform_ and _GitLab CI_ are created in _Google Identity and Access Management (IAM)_.
+* Variables and secrets required by _GitLab CI_ for triggering builds in _Google Cloud Build_ are provided by a script and have to be entered in GitLab manually. If new environments should be required frequently, this can be automated by using GitLab's API.
+
+GitLab:: <<glossary-gitlab,GitLab>> holds the Git repository. Changes to the source code trigger the execution of a <<glossary-gitlab-ci,_GitLab CI_>> workflow (also defined in the repository). This workflow builds the services and runs tests but also triggers builds in _Google Cloud Build_ depending on the changes that were made, e.g. each service is only built if its source code was changed. +
++
+The source codes and _Terraform_ configuration files are stored in _Google Cloud Storage_ buckets to make them accessible in _Google Cloud Build_ (shown in the diagram in [red]#red#).
+
+Google Cloud Build:: The Git repository contains configurations for running builds in _Google Cloud Build_. These builds are triggered by the _GitLab CI_ workflow:
+* Run _Terraform_ to provision changes to the infrastructure ([blue]#blue#). +
++
+The Terraform state is stored in a Bucket ([teal]#teal#); it also contains IDs of the Cloud resources and additional information (e.g. database connect strings). +
++
+Terraform also creates credentials required by the services (e.g. database users and passwords) and stores the secrets in _Google Secret Manager_ ([fuchsia]#fuchsia#). +
++
+Only changes made in Git branches that correspond to an environment (dev, staging, prod etc.) are applied to the infrastructure.
+* Compile the services, build <<glossary-container,Container>> images and push them to _Google Container Registry_ ([green]#green#). +
++
+Only services whose source code was changed are rebuilt. The source code of each service contains a _Cloud Build_ configuration for building it and a _Dockerfile_ for creating the Container image.
+
+* Deploy services in _Google Cloud Run_ ([maroon]#maroon#). Required information like database connection strings are retrieved from the _Terraform_ state ([teal]#teal#) and included in the service definitions. +
++
+Secrets required by the services are not added to the service definitions to keep them protected - instead, the services retrieve the secrets upon container startup from _Google Secret Manager_ ([fuchsia]#fuchsia#). +
++
+When starting a service container, _Cloud Run_ retrieves the previously built Container image from the _Container Registry_ ([green]#green#). +
++
+Each service is only deployed if its source code or the infrastructure configuration were changed. All services contain _Cloud Build_ configurations and <<glossary-knative,Knative>> service definitions for deploying them.
