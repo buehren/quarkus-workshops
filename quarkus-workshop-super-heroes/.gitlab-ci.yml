@@ -16,19 +16,16 @@ stages:
   - prepare
   - deploy services
 
-variables:
-  PROJECT_DIR: /quarkus-workshop-super-heroes
-
 infrastructure:
   stage: prepare
   trigger:
-    include: $PROJECT_DIR/infrastructure/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/infrastructure/.gitlab-ci.yml
     strategy: depend
   only:
     refs:
       - branches
     changes:
-      - $PROJECT_DIR/infrastructure/
+      - /quarkus-workshop-super-heroes/infrastructure/
 
 
 build villain service:
@@ -36,15 +33,15 @@ build villain service:
   variables:
     TARGET: build
     SERVICE_NAME: rest-villain
-    SERVICE_DIR: $PROJECT_DIR/super-heroes/$SERVICE_NAME
+    SERVICE_DIR: /quarkus-workshop-super-heroes/super-heroes/$SERVICE_NAME
   trigger:
-    include: $SERVICE_DIR/deployment/gcp/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
   only:
     refs:
       - branches
     changes:
-      - $SERVICE_DIR/
+      - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
 
 
 deploy villain service:
@@ -55,16 +52,16 @@ deploy villain service:
   variables:
     TARGET: deploy
     SERVICE_NAME: rest-villain
-    SERVICE_DIR: $PROJECT_DIR/super-heroes/$SERVICE_NAME
+    SERVICE_DIR: /quarkus-workshop-super-heroes/super-heroes/$SERVICE_NAME
   trigger:
-    include: $SERVICE_DIR/deployment/gcp/.gitlab-ci.yml
+    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
   only:
     refs:
       - branches
     changes:
-      - $SERVICE_DIR/
-      - $PROJECT_DIR/infrastructure/
+      - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
+      - /quarkus-workshop-super-heroes/infrastructure/
 
 
 # https://docs.gitlab.com/ee/ci/environments
