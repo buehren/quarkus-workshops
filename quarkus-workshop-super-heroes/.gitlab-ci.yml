@@ -16,37 +16,35 @@ stages:
   - prepare
   - deploy services
 
-print path:
-  stage: prepare
-  script:
-    - echo "CI_CONFIG_PATH=${CI_CONFIG_PATH}"
-    - env
-    - export
+variables:
+  PROJECT_DIR: /quarkus-workshop-super-heroes
 
 infrastructure:
   stage: prepare
   trigger:
-    include: /quarkus-workshop-super-heroes/infrastructure/.gitlab-ci.yml
+    include: $PROJECT_DIR/infrastructure/.gitlab-ci.yml
     strategy: depend
   only:
     refs:
       - branches
     changes:
-      - /quarkus-workshop-super-heroes/infrastructure/
+      - $PROJECT_DIR/infrastructure/
 
 
 build villain service:
   stage: prepare
-  trigger:
-    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
-    strategy: depend
   variables:
     TARGET: build
+    SERVICE_NAME: rest-villain
+    SERVICE_DIR: $PROJECT_DIR/super-heroes/$SERVICE_NAME
+  trigger:
+    include: $SERVICE_DIR/deployment/gcp/.gitlab-ci.yml
+    strategy: depend
   only:
     refs:
       - branches
     changes:
-      - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
+      - $SERVICE_DIR/
 
 
 deploy villain service:
@@ -54,17 +52,19 @@ deploy villain service:
   needs:
     - build villain service
     - infrastructure
-  trigger:
-    include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
-    strategy: depend
   variables:
     TARGET: deploy
+    SERVICE_NAME: rest-villain
+    SERVICE_DIR: $PROJECT_DIR/super-heroes/$SERVICE_NAME
+  trigger:
+    include: $SERVICE_DIR/deployment/gcp/.gitlab-ci.yml
+    strategy: depend
   only:
     refs:
       - branches
     changes:
-      - /quarkus-workshop-super-heroes/super-heroes/rest-villain/
-      - /quarkus-workshop-super-heroes/infrastructure/
+      - $SERVICE_DIR/
+      - $PROJECT_DIR/infrastructure/
 
 
 # https://docs.gitlab.com/ee/ci/environments
