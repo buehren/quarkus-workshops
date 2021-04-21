@@ -28,12 +28,15 @@ infrastructure:
       - /quarkus-workshop-super-heroes/infrastructure/
 
 
+# To avoid repeating jobs for every service, we could generate them
+# https://www.objectif-libre.com/en/blog/2021/02/23/a-new-era-for-gitlab-ci-dynamic-child-pipelines/
+
 build villain service:
   stage: prepare
   variables:
     TARGET: build
     SERVICE_NAME: rest-villain
-    SERVICE_DIR: /quarkus-workshop-super-heroes/super-heroes/$SERVICE_NAME
+    SERVICE_DIR: quarkus-workshop-super-heroes/super-heroes/$SERVICE_NAME
   trigger:
     include: /quarkus-workshop-super-heroes/super-heroes/rest-villain/deployment/gcp/.gitlab-ci.yml
     strategy: depend
