@@ -24,3 +24,33 @@ Various options:
 * more detailed in form of separate sections per decision
 * ADR (architecture decision record) for every important decision
 ****
+
+
+
+Stichpunkte in Meeting Minutes!
+
+
+Cloud Build für parallele Nutzung mehrerer Container mit viel RAM und CPU für Erzeugung von native binaries.
+
+The actual workflow steps should be implemented in scripts to avoid a strong dependency on Google Cloud Build.
+
+Triggering the builds is required because the GitLab repository is not available on the Internet
+so that we cannot add triggers to Google Cloud Build.
+
+
+Mono Repo
+
+Single Infrastructure configuration
+Uniform Infrastructure configuration
+
+
+Keine Serverless-Datenbank, weil nicht kompatibel zu etwas, das man selbst hosten kann
+
+Keine Functions, weil bei Cloud Anbietern nicht kompatibel zu etwas, das man selbst hosten kann
+
+
+Microservices, weil ...
+
+MongoDB, weil ....
+
+Apache Kafka, weil ...
