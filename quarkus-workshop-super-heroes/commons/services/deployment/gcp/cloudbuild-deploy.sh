@@ -1,5 +1,8 @@
 #!/bin/bash
 
+Nötig? Oder automatisch gegeben durch aktuellen Commit?
+Letztes IMAGE_TAG beim Build speichern und hier wieder verwenden! Nur so neues deploy eines vorhandenen Image möglich
+
 echo "GCP_PROJECT_ID=${GCP_PROJECT_ID}"
 echo "GCP_BUCKET_CLOUDBUILD_SOURCE=${GCP_BUCKET_CLOUDBUILD_SOURCE}"
 echo "GCP_BUCKET_CLOUDBUILD_LOG=${GCP_BUCKET_CLOUDBUILD_LOG}"
